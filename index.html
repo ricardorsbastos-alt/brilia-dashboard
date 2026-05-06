@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRILIA — Dashboard KPI 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #1e2330;
+    --accent: #f5a623;
+    --accent2: #e8c56e;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --yellow: #f39c12;
+    --blue: #3498db;
+    --text: #e8ecf4;
+    --muted: #6b7590;
+    --chart-line: #f5a623;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: relative;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent) 0%, transparent 60%);
+  }
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .brand-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .brand-tagline {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .header-center {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .status-text { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+  #clock {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 2px;
+  }
+
+  /* PERIOD BAR */
+  .period-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 28px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .period-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .period-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .period-controls select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 4px 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    border-radius: 3px;
+    cursor: pointer;
+    outline: none;
+  }
+  .period-controls select:focus { border-color: var(--accent); }
+  .separator { color: var(--muted); }
+  .refresh-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* CONFIG BAR */
+  .config-bar {
+    padding: 8px 28px;
+    background: #0d1018;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .config-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .config-input {
+    flex: 1;
+    min-width: 300px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 10px;
+    font-size: 11px;
+    font-family: 'Barlow', sans-serif;
+    border-radius: 3px;
+    outline: none;
+  }
+  .config-input:focus { border-color: var(--accent); color: var(--text); }
+  .config-apply {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 5px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: opacity 0.2s;
+  }
+  .config-apply:hover { opacity: 0.85; }
+
+  /* MAIN GRID */
+  .main {
+    padding: 20px 28px;
+    display: grid;
+    grid-template-rows: auto auto;
+    gap: 16px;
+  }
+
+  /* KPI CARDS */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 18px 20px 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .kpi-card.scrap-qty::before  { background: var(--red); }
+  .kpi-card.scrap-cost::before { background: var(--yellow); }
+  .kpi-card.bom::before        { background: var(--blue); }
+  .kpi-card.efic::before       { background: var(--green); }
+
+  .kpi-icon {
+    font-size: 16px;
+    margin-bottom: 8px;
+    opacity: 0.7;
+  }
+  .kpi-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .kpi-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text);
+    letter-spacing: -1px;
+  }
+  .kpi-value sup {
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--muted);
+    vertical-align: super;
+  }
+  .kpi-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+  .kpi-status.ok  { background: rgba(46,204,113,0.12); color: var(--green); }
+  .kpi-status.bad { background: rgba(231,76,60,0.12);  color: var(--red); }
+  .kpi-status.warn{ background: rgba(243,156,18,0.12); color: var(--yellow); }
+  .kpi-status .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  /* META line */
+  .kpi-meta {
+    position: absolute;
+    bottom: 14px; right: 14px;
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px;
+  }
+
+  /* CHARTS ROW */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 12px;
+  }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 18px;
+  }
+  .chart-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chart-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .chart-wrap { position: relative; }
+  canvas { display: block; }
+
+  /* METAS ROW */
+  .metas-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 4px;
+  }
+  .meta-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .meta-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-family: 'Barlow Condensed', sans-serif;
+    min-width: 80px;
+  }
+  .meta-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 3px 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: right;
+    border-radius: 2px;
+    outline: none;
+    width: 80px;
+  }
+  .meta-input:focus { border-color: var(--accent); }
+
+  /* LOADING */
+  .loading-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* FOOTER */
+  .footer {
+    padding: 10px 28px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-text { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+  #last-update { color: var(--accent); }
+
+  /* Responsive for TV */
+  @media (min-width: 1600px) {
+    .kpi-value { font-size: 48px; }
+    body { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="brand">
+    <span class="brand-name">BRILIA</span>
+    <span class="brand-tagline">Luz muda tudo</span>
+  </div>
+  <div class="header-center">
+    DASHBOARD DE INDICADORES — 2026
+  </div>
+  <div class="header-right">
+    <div class="status-dot" id="status-dot"></div>
+    <span class="status-text" id="status-text">CONECTANDO...</span>
+    <span id="clock">--:--:--</span>
+  </div>
+</div>
+
+<!-- PERIOD BAR -->
+<div class="period-bar">
+  <span class="period-label">⬦ Período de análise</span>
+  <div class="period-controls">
+    <select id="mes-inicio">
+      <option value="0">Jan</option><option value="1">Fev</option>
+      <option value="2">Mar</option><option value="3">Abr</option>
+      <option value="4">Mai</option><option value="5">Jun</option>
+      <option value="6">Jul</option><option value="7">Ago</option>
+      <option value="8">Set</option><option value="9">Out</option>
+      <option value="10">Nov</option><option value="11">Dez</option>
+    </select>
+    <span class="separator">→</span>
+    <select id="mes-fim">
+      <option value="0">Jan</option><option value="1">Fev</option>
+      <option value="2">Mar</option><option value="3">Abr</option>
+      <option value="4" selected>Mai</option><option value="5">Jun</option>
+      <option value="6">Jul</option><option value="7">Ago</option>
+      <option value="8">Set</option><option value="9">Out</option>
+      <option value="10">Nov</option><option value="11">Dez</option>
+    </select>
+    <button class="refresh-btn" onclick="loadData()">↺ ATUALIZAR</button>
+  </div>
+</div>
+
+<!-- CONFIG BAR -->
+<div class="config-bar">
+  <span class="config-label">⬦ Google Sheets URL</span>
+  <input type="text" class="config-input" id="sheets-url"
+    value="https://script.google.com/macros/s/AKfycby1DqOThSoS9fBW9j5ffDl_YWHa6BvcaTWI0He3UED2WL21ibpulbOgrd9nOP8W8Y4B/exec"
+    placeholder="Cole aqui a URL do Apps Script...">
+  <button class="config-apply" onclick="saveAndLoad()">APLICAR</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- KPI CARDS -->
+  <div class="kpi-row" id="kpi-row">
+    <div class="kpi-card scrap-qty">
+      <div class="kpi-icon">🗑</div>
+      <div class="kpi-label">Scrap — Quantidade</div>
+      <div class="kpi-value" id="v-scrap-qty">—</div>
+      <div class="kpi-status" id="s-scrap-qty"><span class="dot"></span> Aguardando</div>
+      <div class="kpi-meta">META: <span id="m-scrap-qty">—</span></div>
+    </div>
+    <div class="kpi-card scrap-cost">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-label">Scrap — Custo</div>
+      <div class="kpi-value" id="v-scrap-cost"><sup>R$</sup>—</div>
+      <div class="kpi-status" id="s-scrap-cost"><span class="dot"></span> Aguardando</div>
+      <div class="kpi-meta">META: <span id="m-scrap-cost">—</span></div>
+    </div>
+    <div class="kpi-card bom">
+      <div class="kpi-icon">📋</div>
+      <div class="kpi-label">Erros de BOM</div>
+      <div class="kpi-value" id="v-bom">—</div>
+      <div class="kpi-status" id="s-bom"><span class="dot"></span> Aguardando</div>
+      <div class="kpi-meta">META: <span id="m-bom">—</span></div>
+    </div>
+    <div class="kpi-card efic">
+      <div class="kpi-icon">⚡</div>
+      <div class="kpi-label">Eficiência Minutos</div>
+      <div class="kpi-value" id="v-efic">—<sup>%</sup></div>
+      <div class="kpi-status" id="s-efic"><span class="dot"></span> Aguardando</div>
+      <div class="kpi-meta">META: <span id="m-efic">—</span></div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts-row">
+    <!-- Scrap custo + qtd linha -->
+    <div class="chart-card">
+      <div class="chart-title">Scrap por Mês</div>
+      <div class="chart-wrap">
+        <canvas id="chart-scrap" height="160"></canvas>
+      </div>
+    </div>
+    <!-- Eficiência -->
+    <div class="chart-card">
+      <div class="chart-title">Eficiência %</div>
+      <div class="chart-wrap">
+        <canvas id="chart-efic" height="160"></canvas>
+      </div>
+    </div>
+    <!-- BOM erros -->
+    <div class="chart-card">
+      <div class="chart-title">Erros de BOM</div>
+      <div class="chart-wrap">
+        <canvas id="chart-bom" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- METAS EDITÁVEIS -->
+  <div class="metas-row">
+    <div class="meta-block">
+      <span class="meta-label">Meta Scrap Qtd</span>
+      <input type="number" class="meta-input" id="meta-scrap-qty" value="150" onchange="renderAll()">
+    </div>
+    <div class="meta-block">
+      <span class="meta-label">Meta Scrap R$</span>
+      <input type="number" class="meta-input" id="meta-scrap-cost" value="3000" onchange="renderAll()">
+    </div>
+    <div class="meta-block">
+      <span class="meta-label">Meta BOM Erros</span>
+      <input type="number" class="meta-input" id="meta-bom" value="0" onchange="renderAll()">
+    </div>
+    <div class="meta-block">
+      <span class="meta-label">Meta Efic. %</span>
+      <input type="number" class="meta-input" id="meta-efic" value="95" onchange="renderAll()">
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-text">BRILIA LUMINÁRIAS · Navegantes, SC · Coordenação de Processos e Melhoria Contínua</span>
+  <span class="footer-text">Última atualização: <span id="last-update">—</span></span>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const REFRESH_INTERVAL = 60; // segundos
+let charts = {};
+let rawData = null;
+let countdown = REFRESH_INTERVAL;
+
+// Dados de demonstração (usados quando não há Sheets configurado)
+const DEMO_DATA = [
+  { mes:'Jan', scrapQty:204, scrapCost:1672.69, bomErros:0, minPlan:0,   minReal:0,          efic:0 },
+  { mes:'Fev', scrapQty:61,  scrapCost:632.85,  bomErros:0, minPlan:0,   minReal:0,          efic:0 },
+  { mes:'Mar', scrapQty:182, scrapCost:3799.46, bomErros:0, minPlan:0,   minReal:0,          efic:0 },
+  { mes:'Abr', scrapQty:204, scrapCost:1623.89, bomErros:5, minPlan:70896,minReal:71620.74,  efic:101.02 },
+  { mes:'Mai', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
+  { mes:'Jun', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
+  { mes:'Jul', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
+  { mes:'Ago', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
+  { mes:'Set', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
+  { mes:'Out', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
+  { mes:'Nov', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
+  { mes:'Dez', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
+];
+
+// ─── CLOCK ───────────────────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ─── AUTO REFRESH COUNTER ────────────────────────────────────────────────────
+function tick() {
+  countdown--;
+  if (countdown <= 0) {
+    countdown = REFRESH_INTERVAL;
+    loadData();
+  }
+}
+setInterval(tick, 1000);
+
+// ─── SAVE & LOAD ─────────────────────────────────────────────────────────────
+function saveAndLoad() {
+  const url = document.getElementById('sheets-url').value.trim();
+  if (url) localStorage.setItem('brilia_sheets_url', url);
+  loadData();
+}
+
+// ─── LOAD DATA ───────────────────────────────────────────────────────────────
+async function loadData() {
+  const url = localStorage.getItem('brilia_sheets_url') ||
+              document.getElementById('sheets-url').value.trim();
+
+  if (url) {
+    document.getElementById('sheets-url').value = url;
+    setStatus('BUSCANDO...', 'warn');
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error('Falha ao buscar dados.');
+      const json = await resp.json();
+      rawData = json.filter(d => d.mes && MESES.some(m => String(d.mes).includes(m))).map(d => ({
+        mes:       String(d.mes),
+        scrapQty:  parseFloat(d.scrapQty)  || 0,
+        scrapCost: parseFloat(d.scrapCost) || 0,
+        bomErros:  parseFloat(d.bomErros)  || 0,
+        minPlan:   parseFloat(d.minPlan)   || 0,
+        minReal:   parseFloat(d.minReal)   || 0,
+        efic:      parseFloat(d.efic)      || 0,
+      }));
+      if (rawData.length === 0) throw new Error('Nenhum dado encontrado na planilha.');
+      setStatus('ONLINE', 'ok');
+    } catch(e) {
+      console.warn('Sheets error:', e.message);
+      rawData = DEMO_DATA;
+      setStatus('DEMO MODE — ' + e.message.substring(0,40), 'warn');
+    }
+  } else {
+    rawData = DEMO_DATA;
+    setStatus('DEMO MODE — configure a URL do Sheets acima', 'warn');
+  }
+
+  document.getElementById('last-update').textContent =
+    new Date().toLocaleTimeString('pt-BR');
+  countdown = REFRESH_INTERVAL;
+  renderAll();
+}
+
+// ─── PARSE CSV DO GOOGLE SHEETS ──────────────────────────────────────────────
+// Espera que a planilha tenha uma aba chamada DASHBOARD com colunas:
+// Mês | ScrapQTD | ScrapCusto | BOMerros | MinPlan | MinReal | Efic
+// A linha 1 é o cabeçalho, linhas 2-13 são Jan-Dez
+function parseCSV(text) {
+  const lines = text.split('\n').map(l => l.split(','));
+  const result = [];
+  // Procura linha de cabeçalho com "Mês" ou "Mes"
+  let startRow = 0;
+  for (let i = 0; i < Math.min(lines.length, 10); i++) {
+    const row = lines[i].map(c => c.trim().toLowerCase());
+    if (row.some(c => c.includes('jan') || c.includes('m') && c.includes('s'))) {
+      startRow = i;
+      break;
+    }
+  }
+  for (let i = startRow; i < lines.length && i < startRow + 12; i++) {
+    const row = lines[i].map(c => c.replace(/["\r]/g, '').trim());
+    if (!row[0] || !MESES.some(m => row[0].toLowerCase().includes(m.toLowerCase()))) continue;
+    result.push({
+      mes:       row[0],
+      scrapQty:  parseFloat(row[1]) || 0,
+      scrapCost: parseFloat(row[2]) || 0,
+      bomErros:  parseFloat(row[3]) || 0,
+      minPlan:   parseFloat(row[4]) || 0,
+      minReal:   parseFloat(row[5]) || 0,
+      efic:      parseFloat(row[6]) || 0,
+    });
+  }
+  return result.length > 0 ? result : DEMO_DATA;
+}
+
+// ─── RENDER ALL ──────────────────────────────────────────────────────────────
+function renderAll() {
+  if (!rawData) return;
+
+  const inicio = parseInt(document.getElementById('mes-inicio').value);
+  const fim    = parseInt(document.getElementById('mes-fim').value);
+  const filtered = rawData.filter((_, i) => i >= inicio && i <= fim);
+  const labels = filtered.map(d => d.mes);
+
+  const totQty  = filtered.reduce((a,d) => a + d.scrapQty, 0);
+  const totCost = filtered.reduce((a,d) => a + d.scrapCost, 0);
+  const totBom  = filtered.reduce((a,d) => a + d.bomErros, 0);
+  const hasEfic = filtered.filter(d => d.efic > 0);
+  const avgEfic = hasEfic.length ? hasEfic.reduce((a,d) => a + d.efic, 0) / hasEfic.length : 0;
+
+  // Metas
+  const mQty  = parseFloat(document.getElementById('meta-scrap-qty').value)  || 150;
+  const mCost = parseFloat(document.getElementById('meta-scrap-cost').value) || 3000;
+  const mBom  = parseFloat(document.getElementById('meta-bom').value)        || 0;
+  const mEfic = parseFloat(document.getElementById('meta-efic').value)       || 95;
+
+  // KPI Cards
+  setKPI('scrap-qty',  totQty,
+    totQty > mQty ? 'bad' : 'ok',
+    totQty > mQty ? `⚠ Acima da meta (${mQty})` : `✓ Dentro da meta`,
+    mQty);
+
+  setKPI('scrap-cost', 'R$'+fmt(totCost),
+    totCost > mCost ? 'bad' : 'ok',
+    totCost > mCost ? `⚠ Acima da meta` : `✓ Dentro da meta`,
+    'R$'+fmt(mCost));
+
+  setKPI('bom', totBom,
+    totBom > mBom ? 'bad' : 'ok',
+    totBom > mBom ? `⚠ ${totBom} erros encontrados` : `✓ Dentro da meta`,
+    mBom);
+
+  const eficRound = avgEfic.toFixed(1);
+  setKPI('efic', eficRound+'%',
+    avgEfic < mEfic && avgEfic > 0 ? 'bad' : avgEfic === 0 ? 'warn' : 'ok',
+    avgEfic === 0 ? '— Sem dados no período' :
+    avgEfic < mEfic ? `⚠ ${eficRound}% — abaixo da meta` : `✓ ${eficRound}% — na meta`,
+    mEfic+'%');
+
+  // Charts
+  drawScrapChart(labels, filtered, mCost);
+  drawEficChart(labels, filtered, mEfic);
+  drawBomChart(labels, filtered);
+}
+
+function fmt(v) {
+  if (v >= 1000) return (v/1000).toFixed(1)+'k';
+  return v.toFixed(0);
+}
+
+function setKPI(id, value, status, statusText, meta) {
+  const v = document.getElementById('v-'+id);
+  const s = document.getElementById('s-'+id);
+  const m = document.getElementById('m-'+id);
+  if (id === 'scrap-cost') {
+    v.innerHTML = `<sup>R$</sup>${fmt(parseFloat(String(value).replace('R$','')))}`;
+  } else if (id === 'efic') {
+    v.innerHTML = String(value).replace('%','') + `<sup>%</sup>`;
+  } else {
+    v.textContent = value;
+  }
+  s.className = 'kpi-status ' + status;
+  s.innerHTML = `<span class="dot"></span> ${statusText}`;
+  if (m) m.textContent = meta;
+}
+
+// ─── CHARTS ──────────────────────────────────────────────────────────────────
+const CHART_DEFAULTS = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false }, tooltip: {
+    backgroundColor: '#1e2330',
+    titleColor: '#f5a623',
+    bodyColor: '#e8ecf4',
+    borderColor: '#f5a623',
+    borderWidth: 1,
+  }},
+  scales: {
+    x: { grid: { color: '#1e2330' }, ticks: { color: '#6b7590', font: { family: 'Barlow Condensed', size: 11 } } },
+    y: { grid: { color: '#1e2330' }, ticks: { color: '#6b7590', font: { family: 'Barlow Condensed', size: 11 } } },
+  }
+};
+
+function drawScrapChart(labels, data, meta) {
+  const ctx = document.getElementById('chart-scrap').getContext('2d');
+  if (charts.scrap) charts.scrap.destroy();
+  charts.scrap = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Custo R$',
+          data: data.map(d => d.scrapCost),
+          backgroundColor: data.map(d => d.scrapCost > meta ? 'rgba(231,76,60,0.7)' : 'rgba(245,166,35,0.6)'),
+          borderColor:     data.map(d => d.scrapCost > meta ? '#e74c3c' : '#f5a623'),
+          borderWidth: 1,
+          yAxisID: 'y',
+        },
+        {
+          label: 'Qtd peças',
+          data: data.map(d => d.scrapQty),
+          type: 'line',
+          borderColor: '#6b7590',
+          backgroundColor: 'transparent',
+          pointBackgroundColor: '#6b7590',
+          pointRadius: 3,
+          tension: 0.3,
+          yAxisID: 'y2',
+        }
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      scales: {
+        ...CHART_DEFAULTS.scales,
+        y:  { ...CHART_DEFAULTS.scales.y, position: 'left',  title: { display:true, text:'R$', color:'#6b7590', font:{size:10} } },
+        y2: { ...CHART_DEFAULTS.scales.y, position: 'right', grid:{display:false}, title: { display:true, text:'Qtd', color:'#6b7590', font:{size:10} } },
+      }
+    }
+  });
+}
+
+function drawEficChart(labels, data, meta) {
+  const ctx = document.getElementById('chart-efic').getContext('2d');
+  if (charts.efic) charts.efic.destroy();
+  charts.efic = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Eficiência %',
+          data: data.map(d => d.efic || null),
+          borderColor: '#2ecc71',
+          backgroundColor: 'rgba(46,204,113,0.08)',
+          fill: true,
+          tension: 0.3,
+          pointBackgroundColor: data.map(d => d.efic > 0 && d.efic < meta ? '#e74c3c' : '#2ecc71'),
+          pointRadius: 4,
+        },
+        {
+          label: 'Meta',
+          data: data.map(() => meta),
+          borderColor: 'rgba(245,166,35,0.4)',
+          borderDash: [4,4],
+          borderWidth: 1,
+          pointRadius: 0,
+          fill: false,
+        }
+      ]
+    },
+    options: CHART_DEFAULTS
+  });
+}
+
+function drawBomChart(labels, data) {
+  const ctx = document.getElementById('chart-bom').getContext('2d');
+  if (charts.bom) charts.bom.destroy();
+  charts.bom = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Erros BOM',
+        data: data.map(d => d.bomErros),
+        backgroundColor: data.map(d => d.bomErros > 0 ? 'rgba(52,152,219,0.7)' : 'rgba(52,152,219,0.2)'),
+        borderColor: '#3498db',
+        borderWidth: 1,
+        borderRadius: 2,
+      }]
+    },
+    options: CHART_DEFAULTS
+  });
+}
+
+// ─── STATUS ──────────────────────────────────────────────────────────────────
+function setStatus(text, type) {
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
+  txt.textContent = text;
+  dot.style.background = type === 'ok' ? 'var(--green)' : type === 'bad' ? 'var(--red)' : 'var(--yellow)';
+  dot.style.boxShadow  = type === 'ok' ? '0 0 8px var(--green)' : type === 'bad' ? '0 0 8px var(--red)' : '0 0 8px var(--yellow)';
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('brilia_sheets_url');
+  if (saved) document.getElementById('sheets-url').value = saved;
+  loadData();
+});
+
+document.getElementById('mes-inicio').addEventListener('change', renderAll);
+document.getElementById('mes-fim').addEventListener('change', renderAll);
+</script>
+</body>
+</html>
