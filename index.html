@@ -285,12 +285,15 @@
     letter-spacing: 1px;
   }
 
-  /* CHARTS ROW */
-  .charts-row {
+  /* LAYOUT: 4 colunas, cada uma com card + chart empilhados */
+  .kpi-col-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: repeat(4, 1fr);
     gap: 12px;
+    align-items: start;
   }
+  .kpi-col { display: flex; flex-direction: column; gap: 10px; }
+  .charts-row { display: none; }
   .chart-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -452,61 +455,77 @@
 <!-- MAIN -->
 <div class="main">
 
-  <!-- KPI CARDS -->
-  <div class="kpi-row" id="kpi-row">
-    <div class="kpi-card scrap-qty">
-      <div class="kpi-icon">📊</div>
-      <div class="kpi-label">Custo Unitário Scrap</div>
-      <div class="kpi-value" id="v-scrap-qty">—</div>
-      <div class="kpi-status" id="s-scrap-qty"><span class="dot"></span> Aguardando</div>
-      <div class="kpi-meta">META: <span id="m-scrap-qty">—</span></div>
-    </div>
-    <div class="kpi-card scrap-cost">
-      <div class="kpi-icon">💰</div>
-      <div class="kpi-label">Scrap — Custo Total</div>
-      <div class="kpi-value" id="v-scrap-cost"><sup>R$</sup>—</div>
-      <div class="kpi-status" id="s-scrap-cost"><span class="dot"></span> Aguardando</div>
-      <div class="kpi-meta">META: <span id="m-scrap-cost">—</span></div>
-    </div>
-    <div class="kpi-card bom">
-      <div class="kpi-icon">📋</div>
-      <div class="kpi-label">Erros de BOM</div>
-      <div class="kpi-value" id="v-bom">—</div>
-      <div class="kpi-status" id="s-bom"><span class="dot"></span> Aguardando</div>
-      <div class="kpi-meta">META: <span id="m-bom">—</span></div>
-    </div>
-    <div class="kpi-card efic">
-      <div class="kpi-icon">⚡</div>
-      <div class="kpi-label">Eficiência Minutos</div>
-      <div class="kpi-value" id="v-efic">—<sup>%</sup></div>
-      <div class="kpi-status" id="s-efic"><span class="dot"></span> Aguardando</div>
-      <div class="kpi-meta">META: <span id="m-efic">—</span></div>
-    </div>
-  </div>
+  <!-- GRID: 4 colunas, card + gráfico empilhados -->
+  <div class="kpi-col-grid">
 
-  <!-- CHARTS -->
-  <div class="charts-row">
-    <!-- Scrap custo + qtd linha -->
-    <div class="chart-card">
-      <div class="chart-title">Scrap por Mês</div>
-      <div class="chart-wrap">
-        <canvas id="chart-scrap" height="160"></canvas>
+    <!-- COL 1: Custo Unitário -->
+    <div class="kpi-col">
+      <div class="kpi-card scrap-qty">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-label">Custo Unitário Scrap</div>
+        <div class="kpi-value" id="v-scrap-qty">—</div>
+        <div class="kpi-status" id="s-scrap-qty"><span class="dot"></span> Aguardando</div>
+        <div class="kpi-meta">META: <span id="m-scrap-qty">—</span></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Custo Unitário / Mês</div>
+        <div class="chart-wrap">
+          <canvas id="chart-scrap-unit" height="140"></canvas>
+        </div>
       </div>
     </div>
-    <!-- Eficiência -->
-    <div class="chart-card">
-      <div class="chart-title">Eficiência %</div>
-      <div class="chart-wrap">
-        <canvas id="chart-efic" height="160"></canvas>
+
+    <!-- COL 2: Custo Total -->
+    <div class="kpi-col">
+      <div class="kpi-card scrap-cost">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-label">Scrap — Custo Total</div>
+        <div class="kpi-value" id="v-scrap-cost"><sup>R$</sup>—</div>
+        <div class="kpi-status" id="s-scrap-cost"><span class="dot"></span> Aguardando</div>
+        <div class="kpi-meta">META: <span id="m-scrap-cost">—</span></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Scrap Custo / Mês</div>
+        <div class="chart-wrap">
+          <canvas id="chart-scrap" height="140"></canvas>
+        </div>
       </div>
     </div>
-    <!-- BOM erros -->
-    <div class="chart-card">
-      <div class="chart-title">Erros de BOM</div>
-      <div class="chart-wrap">
-        <canvas id="chart-bom" height="160"></canvas>
+
+    <!-- COL 3: Erros BOM -->
+    <div class="kpi-col">
+      <div class="kpi-card bom">
+        <div class="kpi-icon">📋</div>
+        <div class="kpi-label">Erros de BOM</div>
+        <div class="kpi-value" id="v-bom">—</div>
+        <div class="kpi-status" id="s-bom"><span class="dot"></span> Aguardando</div>
+        <div class="kpi-meta">META: <span id="m-bom">—</span></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Erros de BOM / Mês</div>
+        <div class="chart-wrap">
+          <canvas id="chart-bom" height="140"></canvas>
+        </div>
       </div>
     </div>
+
+    <!-- COL 4: Eficiência -->
+    <div class="kpi-col">
+      <div class="kpi-card efic">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-label">Eficiência Minutos</div>
+        <div class="kpi-value" id="v-efic">—<sup>%</sup></div>
+        <div class="kpi-status" id="s-efic"><span class="dot"></span> Aguardando</div>
+        <div class="kpi-meta">META: <span id="m-efic">—</span></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Eficiência % / Mês</div>
+        <div class="chart-wrap">
+          <canvas id="chart-efic" height="140"></canvas>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- METAS EDITÁVEIS -->
@@ -675,11 +694,14 @@ function renderAll() {
   // Custo unitário = custo total / quantidade (apenas meses com ambos > 0)
   const custoUnit = totQty > 0 ? totCost / totQty : 0;
 
-  // Eficiência: média apenas dos meses com minPlan > 0 (dados reais)
-  const hasEfic = filtered.filter(d => d.minPlan > 0 && d.minReal > 0);
-  const avgEfic = hasEfic.length
-    ? hasEfic.reduce((a,d) => a + (d.minReal / d.minPlan * 100), 0) / hasEfic.length
-    : filtered.filter(d => d.efic > 0).reduce((a,d,_,arr) => a + d.efic/arr.length, 0);
+  // Eficiência: calcula de minPlan/minReal quando disponível, senão usa coluna efic
+  const eficMeses = filtered.map(d => {
+    if (d.minPlan > 0 && d.minReal > 0) return d.minReal / d.minPlan * 100;
+    if (d.efic > 0) return d.efic;
+    return null;
+  });
+  const eficValidos = eficMeses.filter(v => v !== null);
+  const avgEfic = eficValidos.length ? eficValidos.reduce((a,v) => a+v, 0) / eficValidos.length : 0;
 
   // Metas
   const mUnit = parseFloat(document.getElementById('meta-scrap-qty').value)  || 10;
@@ -716,6 +738,7 @@ function renderAll() {
 
   // Charts
   drawScrapChart(labels, filtered, mCost);
+  drawScrapUnitChart(labels, filtered, mUnit);
   drawEficChart(labels, filtered, mEfic);
   drawBomChart(labels, filtered);
 }
@@ -804,9 +827,46 @@ function drawScrapChart(labels, data, meta) {
   });
 }
 
+function drawScrapUnitChart(labels, data, meta) {
+  const ctx = document.getElementById('chart-scrap-unit').getContext('2d');
+  if (charts.scrapUnit) charts.scrapUnit.destroy();
+  const unitData = data.map(d => d.scrapQty > 0 ? parseFloat((d.scrapCost / d.scrapQty).toFixed(2)) : null);
+  charts.scrapUnit = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'R$/un',
+        data: unitData,
+        borderColor: '#e74c3c',
+        backgroundColor: 'rgba(231,76,60,0.08)',
+        fill: true,
+        tension: 0.3,
+        pointBackgroundColor: unitData.map(v => v !== null && v > meta ? '#e74c3c' : '#f5a623'),
+        pointRadius: 4,
+      },{
+        label: 'Meta',
+        data: data.map(() => meta),
+        borderColor: 'rgba(245,166,35,0.4)',
+        borderDash: [4,4],
+        borderWidth: 1,
+        pointRadius: 0,
+        fill: false,
+      }]
+    },
+    options: CHART_DEFAULTS
+  });
+}
+
 function drawEficChart(labels, data, meta) {
   const ctx = document.getElementById('chart-efic').getContext('2d');
   if (charts.efic) charts.efic.destroy();
+  // Calcula eficiência por mês: prefere minPlan/minReal, fallback para coluna efic
+  const eficPorMes = data.map(d => {
+    if (d.minPlan > 0 && d.minReal > 0) return parseFloat((d.minReal / d.minPlan * 100).toFixed(2));
+    if (d.efic > 0) return d.efic;
+    return null;
+  });
   charts.efic = new Chart(ctx, {
     type: 'line',
     data: {
@@ -814,7 +874,7 @@ function drawEficChart(labels, data, meta) {
       datasets: [
         {
           label: 'Eficiência %',
-          data: data.map(d => d.efic || null),
+          data: eficPorMes,
           borderColor: '#2ecc71',
           backgroundColor: 'rgba(46,204,113,0.08)',
           fill: true,
