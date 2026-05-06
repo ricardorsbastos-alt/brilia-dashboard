@@ -455,15 +455,15 @@
   <!-- KPI CARDS -->
   <div class="kpi-row" id="kpi-row">
     <div class="kpi-card scrap-qty">
-      <div class="kpi-icon">🗑</div>
-      <div class="kpi-label">Scrap — Quantidade</div>
+      <div class="kpi-icon">📊</div>
+      <div class="kpi-label">Custo Unitário Scrap</div>
       <div class="kpi-value" id="v-scrap-qty">—</div>
       <div class="kpi-status" id="s-scrap-qty"><span class="dot"></span> Aguardando</div>
       <div class="kpi-meta">META: <span id="m-scrap-qty">—</span></div>
     </div>
     <div class="kpi-card scrap-cost">
       <div class="kpi-icon">💰</div>
-      <div class="kpi-label">Scrap — Custo</div>
+      <div class="kpi-label">Scrap — Custo Total</div>
       <div class="kpi-value" id="v-scrap-cost"><sup>R$</sup>—</div>
       <div class="kpi-status" id="s-scrap-cost"><span class="dot"></span> Aguardando</div>
       <div class="kpi-meta">META: <span id="m-scrap-cost">—</span></div>
@@ -512,12 +512,12 @@
   <!-- METAS EDITÁVEIS -->
   <div class="metas-row">
     <div class="meta-block">
-      <span class="meta-label">Meta Scrap Qtd</span>
-      <input type="number" class="meta-input" id="meta-scrap-qty" value="150" onchange="renderAll()">
+      <span class="meta-label">Meta C. Unit. R$</span>
+      <input type="number" class="meta-input" id="meta-scrap-qty" value="10" onchange="renderAll()">
     </div>
     <div class="meta-block">
       <span class="meta-label">Meta Scrap R$</span>
-      <input type="number" class="meta-input" id="meta-scrap-cost" value="3000" onchange="renderAll()">
+      <input type="number" class="meta-input" id="meta-scrap-cost" value="1000" onchange="renderAll()">
     </div>
     <div class="meta-block">
       <span class="meta-label">Meta BOM Erros</span>
@@ -671,25 +671,36 @@ function renderAll() {
   const totQty  = filtered.reduce((a,d) => a + d.scrapQty, 0);
   const totCost = filtered.reduce((a,d) => a + d.scrapCost, 0);
   const totBom  = filtered.reduce((a,d) => a + d.bomErros, 0);
-  const hasEfic = filtered.filter(d => d.efic > 0);
-  const avgEfic = hasEfic.length ? hasEfic.reduce((a,d) => a + d.efic, 0) / hasEfic.length : 0;
+
+  // Custo unitário = custo total / quantidade (apenas meses com ambos > 0)
+  const custoUnit = totQty > 0 ? totCost / totQty : 0;
+
+  // Eficiência: média apenas dos meses com minPlan > 0 (dados reais)
+  const hasEfic = filtered.filter(d => d.minPlan > 0 && d.minReal > 0);
+  const avgEfic = hasEfic.length
+    ? hasEfic.reduce((a,d) => a + (d.minReal / d.minPlan * 100), 0) / hasEfic.length
+    : filtered.filter(d => d.efic > 0).reduce((a,d,_,arr) => a + d.efic/arr.length, 0);
 
   // Metas
-  const mQty  = parseFloat(document.getElementById('meta-scrap-qty').value)  || 150;
-  const mCost = parseFloat(document.getElementById('meta-scrap-cost').value) || 3000;
+  const mUnit = parseFloat(document.getElementById('meta-scrap-qty').value)  || 10;
+  const mCost = parseFloat(document.getElementById('meta-scrap-cost').value) || 1000;
   const mBom  = parseFloat(document.getElementById('meta-bom').value)        || 0;
   const mEfic = parseFloat(document.getElementById('meta-efic').value)       || 95;
 
   // KPI Cards
-  setKPI('scrap-qty',  totQty,
-    totQty > mQty ? 'bad' : 'ok',
-    totQty > mQty ? `⚠ Acima da meta (${mQty})` : `✓ Dentro da meta`,
-    mQty);
+  // Card 1: Custo Unitário
+  const cuLabel = `R$ ${custoUnit.toFixed(2)}/un`;
+  setKPI('scrap-qty', cuLabel,
+    custoUnit > mUnit ? 'bad' : custoUnit === 0 ? 'warn' : 'ok',
+    custoUnit === 0 ? '— Sem dados' :
+    custoUnit > mUnit ? `⚠ Acima da meta` : `✓ Dentro da meta`,
+    `R$${mUnit.toFixed(2)}/un`);
 
-  setKPI('scrap-cost', 'R$'+fmt(totCost),
+  // Card 2: Custo Total — valor real formatado
+  setKPI('scrap-cost', totCost,
     totCost > mCost ? 'bad' : 'ok',
     totCost > mCost ? `⚠ Acima da meta` : `✓ Dentro da meta`,
-    'R$'+fmt(mCost));
+    `R$${fmt(mCost)}`);
 
   setKPI('bom', totBom,
     totBom > mBom ? 'bad' : 'ok',
@@ -697,7 +708,7 @@ function renderAll() {
     mBom);
 
   const eficRound = avgEfic.toFixed(1);
-  setKPI('efic', eficRound+'%',
+  setKPI('efic', eficRound,
     avgEfic < mEfic && avgEfic > 0 ? 'bad' : avgEfic === 0 ? 'warn' : 'ok',
     avgEfic === 0 ? '— Sem dados no período' :
     avgEfic < mEfic ? `⚠ ${eficRound}% — abaixo da meta` : `✓ ${eficRound}% — na meta`,
@@ -718,10 +729,16 @@ function setKPI(id, value, status, statusText, meta) {
   const v = document.getElementById('v-'+id);
   const s = document.getElementById('s-'+id);
   const m = document.getElementById('m-'+id);
-  if (id === 'scrap-cost') {
-    v.innerHTML = `<sup>R$</sup>${fmt(parseFloat(String(value).replace('R$','')))}`;
+
+  if (id === 'scrap-qty') {
+    // Custo unitário: já vem formatado como string "R$ X.XX/un"
+    v.innerHTML = String(value).replace('R$ ', '<sup>R$</sup> ');
+  } else if (id === 'scrap-cost') {
+    // Custo total: exibe valor real completo
+    const num = parseFloat(value) || 0;
+    v.innerHTML = `<sup>R$</sup>${num.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
   } else if (id === 'efic') {
-    v.innerHTML = String(value).replace('%','') + `<sup>%</sup>`;
+    v.innerHTML = String(value) + `<sup>%</sup>`;
   } else {
     v.textContent = value;
   }
