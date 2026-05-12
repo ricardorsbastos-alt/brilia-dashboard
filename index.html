@@ -6,398 +6,135 @@
 <title>BRILIA — Dashboard KPI 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0c10;
-    --surface: #111318;
-    --surface2: #181c24;
-    --border: #1e2330;
-    --accent: #f5a623;
-    --accent2: #e8c56e;
-    --green: #2ecc71;
-    --red: #e74c3c;
-    --yellow: #f39c12;
-    --blue: #3498db;
-    --text: #e8ecf4;
-    --muted: #6b7590;
-    --chart-line: #f5a623;
-  }
+:root {
+  --bg: #0a0c10;
+  --surface: #111318;
+  --surface2: #181c24;
+  --border: #1e2330;
+  --accent: #f5a623;
+  --green: #2ecc71;
+  --red: #e74c3c;
+  --yellow: #f39c12;
+  --blue: #3498db;
+  --teal: #1abc9c;
+  --purple: #9b59b6;
+  --text: #e8ecf4;
+  --muted: #6b7590;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; font-size: 13px; min-height: 100vh; overflow-x: hidden; }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* HEADER */
+.header { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid var(--border); background: var(--surface); position: relative; }
+.header::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent) 0%, transparent 60%); }
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 22px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; }
+.brand-tagline { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+.header-center { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.status-text { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+#clock { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: 2px; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Barlow', sans-serif;
-    font-size: 13px;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* PERIOD BAR */
+.period-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 28px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+.period-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+.period-controls { display: flex; align-items: center; gap: 10px; }
+.period-controls select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 4px 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; border-radius: 3px; cursor: pointer; outline: none; }
+.period-controls select:focus { border-color: var(--accent); }
+.refresh-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 12px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border-radius: 3px; transition: all .2s; }
+.refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* HEADER */
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 28px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    position: relative;
-  }
-  .header::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent) 0%, transparent 60%);
-  }
-  .brand {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-  }
-  .brand-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 22px;
-    letter-spacing: 4px;
-    color: var(--accent);
-    text-transform: uppercase;
-  }
-  .brand-tagline {
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-  .header-center {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    text-transform: uppercase;
-    text-align: center;
-  }
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .status-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-  .status-text { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
-  #clock {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text);
-    letter-spacing: 2px;
-  }
+/* CONFIG BAR */
+.config-bar { padding: 8px 28px; background: #0d1018; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.config-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+.config-input { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 4px 10px; font-size: 11px; border-radius: 3px; outline: none; }
+.config-input:focus { border-color: var(--accent); color: var(--text); }
+.config-apply { background: var(--accent); color: #000; border: none; padding: 5px 14px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; font-weight: 700; cursor: pointer; border-radius: 3px; }
+.config-apply:hover { opacity: .85; }
 
-  /* PERIOD BAR */
-  .period-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 28px;
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-  }
-  .period-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-  .period-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .period-controls select {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 4px 10px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    letter-spacing: 1px;
-    border-radius: 3px;
-    cursor: pointer;
-    outline: none;
-  }
-  .period-controls select:focus { border-color: var(--accent); }
-  .separator { color: var(--muted); }
-  .refresh-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 4px 12px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 3px;
-    transition: all 0.2s;
-  }
-  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+/* MAIN */
+.main { padding: 16px 28px; display: flex; flex-direction: column; gap: 14px; }
 
-  /* CONFIG BAR */
-  .config-bar {
-    padding: 8px 28px;
-    background: #0d1018;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .config-label {
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-  .config-input {
-    flex: 1;
-    min-width: 300px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 4px 10px;
-    font-size: 11px;
-    font-family: 'Barlow', sans-serif;
-    border-radius: 3px;
-    outline: none;
-  }
-  .config-input:focus { border-color: var(--accent); color: var(--text); }
-  .config-apply {
-    background: var(--accent);
-    color: #000;
-    border: none;
-    padding: 5px 14px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    font-weight: 700;
-    cursor: pointer;
-    border-radius: 3px;
-    transition: opacity 0.2s;
-  }
-  .config-apply:hover { opacity: 0.85; }
+/* KPI GRID */
+.kpi-col-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.kpi-col { display: flex; flex-direction: column; gap: 10px; }
 
-  /* MAIN GRID */
-  .main {
-    padding: 20px 28px;
-    display: grid;
-    grid-template-rows: auto auto;
-    gap: 16px;
-  }
+/* KPI CARD */
+.kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px 14px; position: relative; overflow: hidden; }
+.kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.kpi-card.c-red::before { background: var(--red); }
+.kpi-card.c-yellow::before { background: var(--yellow); }
+.kpi-card.c-blue::before { background: var(--blue); }
+.kpi-card.c-green::before { background: var(--green); }
+.kpi-card.c-teal::before { background: var(--teal); }
+.kpi-card.c-purple::before { background: var(--purple); }
+.kpi-icon { font-size: 15px; margin-bottom: 6px; opacity: .7; }
+.kpi-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
+.kpi-value { font-family: 'Barlow Condensed', sans-serif; font-size: 34px; font-weight: 700; line-height: 1; color: var(--text); }
+.kpi-value sup { font-size: 12px; font-weight: 400; color: var(--muted); vertical-align: super; }
+.kpi-status { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; }
+.kpi-status.ok { background: rgba(46,204,113,.12); color: var(--green); }
+.kpi-status.bad { background: rgba(231,76,60,.12); color: var(--red); }
+.kpi-status.warn { background: rgba(243,156,18,.12); color: var(--yellow); }
+.kpi-status.info { background: rgba(52,152,219,.12); color: var(--blue); }
+.kpi-status .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.kpi-meta { position: absolute; bottom: 12px; right: 14px; font-size: 10px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; }
 
-  /* KPI CARDS */
-  .kpi-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-  }
-  .kpi-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 18px 20px 16px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-  .kpi-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-  }
-  .kpi-card.scrap-qty::before  { background: var(--red); }
-  .kpi-card.scrap-cost::before { background: var(--yellow); }
-  .kpi-card.bom::before        { background: var(--blue); }
-  .kpi-card.efic::before       { background: var(--green); }
+/* CHART CARD */
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+.chart-title { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.chart-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+canvas { display: block; }
 
-  .kpi-icon {
-    font-size: 16px;
-    margin-bottom: 8px;
-    opacity: 0.7;
-  }
-  .kpi-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-  .kpi-value {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 38px;
-    font-weight: 700;
-    line-height: 1;
-    color: var(--text);
-    letter-spacing: -1px;
-  }
-  .kpi-value sup {
-    font-size: 14px;
-    font-weight: 400;
-    letter-spacing: 0;
-    color: var(--muted);
-    vertical-align: super;
-  }
-  .kpi-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    margin-top: 8px;
-    font-size: 10px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 2px;
-  }
-  .kpi-status.ok  { background: rgba(46,204,113,0.12); color: var(--green); }
-  .kpi-status.bad { background: rgba(231,76,60,0.12);  color: var(--red); }
-  .kpi-status.warn{ background: rgba(243,156,18,0.12); color: var(--yellow); }
-  .kpi-status .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+/* SECOND ROW: Pareto + Tempo Separação + PSP */
+.secondary-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 
-  /* META line */
-  .kpi-meta {
-    position: absolute;
-    bottom: 14px; right: 14px;
-    font-size: 10px;
-    color: var(--muted);
-    font-family: 'Barlow Condensed', sans-serif;
-    letter-spacing: 1px;
-  }
+/* PARETO */
+.pareto-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; }
+.pareto-title { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.pareto-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.pareto-item { margin-bottom: 10px; }
+.pareto-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.pareto-name { font-size: 11px; color: var(--text); }
+.pareto-pct { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: var(--accent); font-weight: 600; }
+.pareto-bar-bg { background: var(--border); border-radius: 2px; height: 4px; }
+.pareto-bar-fill { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--red), var(--accent)); transition: width .5s ease; }
 
-  /* LAYOUT: 4 colunas, cada uma com card + chart empilhados */
-  .kpi-col-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    align-items: start;
-  }
-  .kpi-col { display: flex; flex-direction: column; gap: 10px; }
-  .charts-row { display: none; }
-  .chart-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 16px 18px;
-  }
-  .chart-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .chart-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-  .chart-wrap { position: relative; }
-  canvas { display: block; }
+/* TEMPO SEPARAÇÃO */
+.tempo-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; }
+.tempo-title { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.tempo-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.tempo-big { font-family: 'Barlow Condensed', sans-serif; font-size: 48px; font-weight: 700; color: var(--teal); line-height: 1; }
+.tempo-unit { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.tempo-sub { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tempo-sub-item { background: var(--surface2); border-radius: 3px; padding: 8px 10px; }
+.tempo-sub-label { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+.tempo-sub-val { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 600; color: var(--text); }
 
-  /* METAS ROW */
-  .metas-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-top: 4px;
-  }
-  .meta-block {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .meta-label {
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    text-transform: uppercase;
-    font-family: 'Barlow Condensed', sans-serif;
-    min-width: 80px;
-  }
-  .meta-input {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--accent);
-    padding: 3px 8px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    text-align: right;
-    border-radius: 2px;
-    outline: none;
-    width: 80px;
-  }
-  .meta-input:focus { border-color: var(--accent); }
+/* PSP */
+.psp-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; border-left: 3px solid var(--purple); }
+.psp-title { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; }
+.psp-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(155,89,182,.15); border: 1px solid rgba(155,89,182,.3); border-radius: 3px; padding: 6px 12px; margin-bottom: 12px; }
+.psp-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--purple); animation: pulse 2s infinite; }
+.psp-badge-text { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 2px; color: var(--purple); text-transform: uppercase; }
+.psp-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+.psp-desc strong { color: var(--text); }
 
-  /* LOADING */
-  .loading-overlay {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 40px;
-    color: var(--muted);
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    font-family: 'Barlow Condensed', sans-serif;
-  }
-  .spinner {
-    width: 16px; height: 16px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* METAS */
+.metas-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.meta-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; }
+.meta-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif; min-width: 80px; }
+.meta-input { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--accent); padding: 3px 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; text-align: right; border-radius: 2px; outline: none; width: 80px; }
+.meta-input:focus { border-color: var(--accent); }
 
-  /* FOOTER */
-  .footer {
-    padding: 10px 28px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .footer-text { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
-  #last-update { color: var(--accent); }
+/* FOOTER */
+.footer { padding: 10px 28px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.footer-text { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+#last-update { color: var(--accent); }
 
-  /* Responsive for TV */
-  @media (min-width: 1600px) {
-    .kpi-value { font-size: 48px; }
-    body { font-size: 14px; }
-  }
+@media (min-width: 1600px) { .kpi-value { font-size: 42px; } }
 </style>
 </head>
 <body>
@@ -408,9 +145,7 @@
     <span class="brand-name">BRILIA</span>
     <span class="brand-tagline">Luz muda tudo</span>
   </div>
-  <div class="header-center">
-    DASHBOARD DE INDICADORES — 2026
-  </div>
+  <div class="header-center">DASHBOARD DE INDICADORES — 2026</div>
   <div class="header-right">
     <div class="status-dot" id="status-dot"></div>
     <span class="status-text" id="status-text">CONECTANDO...</span>
@@ -430,7 +165,7 @@
       <option value="8">Set</option><option value="9">Out</option>
       <option value="10">Nov</option><option value="11">Dez</option>
     </select>
-    <span class="separator">→</span>
+    <span style="color:var(--muted)">→</span>
     <select id="mes-fim">
       <option value="0">Jan</option><option value="1">Fev</option>
       <option value="2">Mar</option><option value="3">Abr</option>
@@ -455,29 +190,27 @@
 <!-- MAIN -->
 <div class="main">
 
-  <!-- GRID: 4 colunas, card + gráfico empilhados -->
+  <!-- ROW 1: KPIs + Charts -->
   <div class="kpi-col-grid">
 
     <!-- COL 1: Custo Unitário -->
     <div class="kpi-col">
-      <div class="kpi-card scrap-qty">
+      <div class="kpi-card c-red">
         <div class="kpi-icon">📊</div>
         <div class="kpi-label">Custo Unitário Scrap</div>
-        <div class="kpi-value" id="v-scrap-qty">—</div>
-        <div class="kpi-status" id="s-scrap-qty"><span class="dot"></span> Aguardando</div>
-        <div class="kpi-meta">META: <span id="m-scrap-qty">—</span></div>
+        <div class="kpi-value" id="v-scrap-unit">—</div>
+        <div class="kpi-status" id="s-scrap-unit"><span class="dot"></span> Aguardando</div>
+        <div class="kpi-meta">META: <span id="m-scrap-unit">—</span></div>
       </div>
       <div class="chart-card">
         <div class="chart-title">Custo Unitário / Mês</div>
-        <div class="chart-wrap">
-          <canvas id="chart-scrap-unit" height="140"></canvas>
-        </div>
+        <canvas id="chart-scrap-unit" height="130"></canvas>
       </div>
     </div>
 
     <!-- COL 2: Custo Total -->
     <div class="kpi-col">
-      <div class="kpi-card scrap-cost">
+      <div class="kpi-card c-yellow">
         <div class="kpi-icon">💰</div>
         <div class="kpi-label">Scrap — Custo Total</div>
         <div class="kpi-value" id="v-scrap-cost"><sup>R$</sup>—</div>
@@ -486,15 +219,13 @@
       </div>
       <div class="chart-card">
         <div class="chart-title">Scrap Custo / Mês</div>
-        <div class="chart-wrap">
-          <canvas id="chart-scrap" height="140"></canvas>
-        </div>
+        <canvas id="chart-scrap" height="130"></canvas>
       </div>
     </div>
 
     <!-- COL 3: Erros BOM -->
     <div class="kpi-col">
-      <div class="kpi-card bom">
+      <div class="kpi-card c-blue">
         <div class="kpi-icon">📋</div>
         <div class="kpi-label">Erros de BOM</div>
         <div class="kpi-value" id="v-bom">—</div>
@@ -503,15 +234,13 @@
       </div>
       <div class="chart-card">
         <div class="chart-title">Erros de BOM / Mês</div>
-        <div class="chart-wrap">
-          <canvas id="chart-bom" height="140"></canvas>
-        </div>
+        <canvas id="chart-bom" height="130"></canvas>
       </div>
     </div>
 
     <!-- COL 4: Eficiência -->
     <div class="kpi-col">
-      <div class="kpi-card efic">
+      <div class="kpi-card c-green">
         <div class="kpi-icon">⚡</div>
         <div class="kpi-label">Eficiência Minutos</div>
         <div class="kpi-value" id="v-efic">—<sup>%</sup></div>
@@ -520,15 +249,68 @@
       </div>
       <div class="chart-card">
         <div class="chart-title">Eficiência % / Mês</div>
-        <div class="chart-wrap">
-          <canvas id="chart-efic" height="140"></canvas>
-        </div>
+        <canvas id="chart-efic" height="130"></canvas>
       </div>
     </div>
 
   </div>
 
-  <!-- METAS EDITÁVEIS -->
+  <!-- ROW 2: Pareto + Tempo Separação + PSP -->
+  <div class="secondary-row">
+
+    <!-- PARETO DE DEFEITOS -->
+    <div class="pareto-card">
+      <div class="pareto-title">🔬 Pareto de Defeitos — Scrap</div>
+      <div id="pareto-container">
+        <div style="color:var(--muted);font-size:11px;">Carregando...</div>
+      </div>
+    </div>
+
+    <!-- TEMPO DE SEPARAÇÃO -->
+    <div class="tempo-card">
+      <div class="tempo-title">⏱ Tempo Médio de Separação — Almox</div>
+      <div class="tempo-big" id="tempo-medio">—</div>
+      <div class="tempo-unit">horas em média por requisição</div>
+      <div class="tempo-sub">
+        <div class="tempo-sub-item">
+          <div class="tempo-sub-label">Mais rápida</div>
+          <div class="tempo-sub-val" id="tempo-min">—</div>
+        </div>
+        <div class="tempo-sub-item">
+          <div class="tempo-sub-label">Mais lenta</div>
+          <div class="tempo-sub-val" id="tempo-max">—</div>
+        </div>
+        <div class="tempo-sub-item">
+          <div class="tempo-sub-label">Requisições</div>
+          <div class="tempo-sub-val" id="tempo-total">—</div>
+        </div>
+        <div class="tempo-sub-item">
+          <div class="tempo-sub-label">Meta (h)</div>
+          <div class="tempo-sub-val" id="tempo-meta-val">4h</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PSP -->
+    <div class="psp-card">
+      <div class="psp-title">🛡 PSP — Plano de Solução de Problemas</div>
+      <div class="psp-badge">
+        <div class="psp-badge-dot"></div>
+        <span class="psp-badge-text">Em implantação</span>
+      </div>
+      <div class="psp-desc">
+        A metodologia <strong>PSP</strong> está sendo estruturada para a planta de Navegantes.<br><br>
+        Em breve este painel exibirá:<br>
+        • Problemas abertos por área<br>
+        • Tempo médio de resolução<br>
+        • Taxa de recorrência<br><br>
+        <span style="color:var(--purple)">Previsão de ativação: Q3 2026</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- METAS -->
   <div class="metas-row">
     <div class="meta-block">
       <span class="meta-label">Meta C. Unit. R$</span>
@@ -558,381 +340,291 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-// ─── CONFIG ───────────────────────────────────────────────────────────────────
 const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-const REFRESH_INTERVAL = 60; // segundos
+const REFRESH_INTERVAL = 60;
 let charts = {};
 let rawData = null;
 let countdown = REFRESH_INTERVAL;
 
-// Dados de demonstração (usados quando não há Sheets configurado)
 const DEMO_DATA = [
-  { mes:'Jan', scrapQty:204, scrapCost:1672.69, bomErros:0, minPlan:0,   minReal:0,          efic:0 },
-  { mes:'Fev', scrapQty:61,  scrapCost:632.85,  bomErros:0, minPlan:0,   minReal:0,          efic:0 },
-  { mes:'Mar', scrapQty:182, scrapCost:3799.46, bomErros:0, minPlan:0,   minReal:0,          efic:0 },
-  { mes:'Abr', scrapQty:204, scrapCost:1623.89, bomErros:5, minPlan:70896,minReal:71620.74,  efic:101.02 },
-  { mes:'Mai', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
-  { mes:'Jun', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
-  { mes:'Jul', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
-  { mes:'Ago', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
-  { mes:'Set', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
-  { mes:'Out', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
-  { mes:'Nov', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
-  { mes:'Dez', scrapQty:0,   scrapCost:0,        bomErros:0, minPlan:0,   minReal:0,          efic:0 },
+  { mes:'Jan', scrapQty:204, scrapCost:1672.69, bomErros:0, minPlan:0, minReal:0, efic:0 },
+  { mes:'Fev', scrapQty:61,  scrapCost:632.85,  bomErros:0, minPlan:0, minReal:0, efic:0 },
+  { mes:'Mar', scrapQty:182, scrapCost:3799.46, bomErros:0, minPlan:0, minReal:0, efic:0 },
+  { mes:'Abr', scrapQty:204, scrapCost:1623.89, bomErros:5, minPlan:70896, minReal:71620.74, efic:101.02 },
+  { mes:'Mai', scrapQty:0,   scrapCost:0,        bomErros:1, minPlan:23632, minReal:15539, efic:0 },
+  ...Array(7).fill(null).map((_,i)=>({mes:MESES[5+i],scrapQty:0,scrapCost:0,bomErros:0,minPlan:0,minReal:0,efic:0}))
 ];
 
-// ─── CLOCK ───────────────────────────────────────────────────────────────────
+// ── CLOCK ────────────────────────────────────────────────────────────────────
 function updateClock() {
-  const now = new Date();
   document.getElementById('clock').textContent =
-    now.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
-setInterval(updateClock, 1000);
-updateClock();
+setInterval(updateClock, 1000); updateClock();
+setInterval(()=>{ if(--countdown<=0){countdown=REFRESH_INTERVAL;loadData();} }, 1000);
 
-// ─── AUTO REFRESH COUNTER ────────────────────────────────────────────────────
-function tick() {
-  countdown--;
-  if (countdown <= 0) {
-    countdown = REFRESH_INTERVAL;
-    loadData();
-  }
-}
-setInterval(tick, 1000);
-
-// ─── SAVE & LOAD ─────────────────────────────────────────────────────────────
+// ── SAVE & LOAD ───────────────────────────────────────────────────────────────
 function saveAndLoad() {
   const url = document.getElementById('sheets-url').value.trim();
   if (url) localStorage.setItem('brilia_sheets_url', url);
   loadData();
 }
 
-// ─── LOAD DATA ───────────────────────────────────────────────────────────────
 async function loadData() {
   const url = localStorage.getItem('brilia_sheets_url') ||
               document.getElementById('sheets-url').value.trim();
-
   if (url) {
     document.getElementById('sheets-url').value = url;
-    setStatus('BUSCANDO...', 'warn');
+    setStatus('BUSCANDO...','warn');
     try {
       const resp = await fetch(url);
-      if (!resp.ok) throw new Error('Falha ao buscar dados.');
+      if (!resp.ok) throw new Error('Falha');
       const json = await resp.json();
-      rawData = json.filter(d => d.mes && MESES.some(m => String(d.mes).includes(m))).map(d => ({
-        mes:       String(d.mes),
+      rawData = json.filter(d => MESES.some(m => String(d.mes).includes(m))).map(d => ({
+        mes: String(d.mes),
         scrapQty:  parseFloat(d.scrapQty)  || 0,
         scrapCost: parseFloat(d.scrapCost) || 0,
         bomErros:  parseFloat(d.bomErros)  || 0,
         minPlan:   parseFloat(d.minPlan)   || 0,
         minReal:   parseFloat(d.minReal)   || 0,
         efic:      parseFloat(d.efic)      || 0,
+        // Novos campos
+        pareto:    d.pareto   || null,
+        tempoSep:  d.tempoSep || null,
       }));
-      if (rawData.length === 0) throw new Error('Nenhum dado encontrado na planilha.');
-      setStatus('ONLINE', 'ok');
+      if (!rawData.length) throw new Error('Sem dados');
+      setStatus('ONLINE','ok');
     } catch(e) {
-      console.warn('Sheets error:', e.message);
       rawData = DEMO_DATA;
-      setStatus('DEMO MODE — ' + e.message.substring(0,40), 'warn');
+      setStatus('DEMO — '+e.message.substring(0,40),'warn');
     }
   } else {
     rawData = DEMO_DATA;
-    setStatus('DEMO MODE — configure a URL do Sheets acima', 'warn');
+    setStatus('DEMO MODE','warn');
   }
-
-  document.getElementById('last-update').textContent =
-    new Date().toLocaleTimeString('pt-BR');
+  document.getElementById('last-update').textContent = new Date().toLocaleTimeString('pt-BR');
   countdown = REFRESH_INTERVAL;
   renderAll();
 }
 
-// ─── PARSE CSV DO GOOGLE SHEETS ──────────────────────────────────────────────
-// Espera que a planilha tenha uma aba chamada DASHBOARD com colunas:
-// Mês | ScrapQTD | ScrapCusto | BOMerros | MinPlan | MinReal | Efic
-// A linha 1 é o cabeçalho, linhas 2-13 são Jan-Dez
-function parseCSV(text) {
-  const lines = text.split('\n').map(l => l.split(','));
-  const result = [];
-  // Procura linha de cabeçalho com "Mês" ou "Mes"
-  let startRow = 0;
-  for (let i = 0; i < Math.min(lines.length, 10); i++) {
-    const row = lines[i].map(c => c.trim().toLowerCase());
-    if (row.some(c => c.includes('jan') || c.includes('m') && c.includes('s'))) {
-      startRow = i;
-      break;
-    }
-  }
-  for (let i = startRow; i < lines.length && i < startRow + 12; i++) {
-    const row = lines[i].map(c => c.replace(/["\r]/g, '').trim());
-    if (!row[0] || !MESES.some(m => row[0].toLowerCase().includes(m.toLowerCase()))) continue;
-    result.push({
-      mes:       row[0],
-      scrapQty:  parseFloat(row[1]) || 0,
-      scrapCost: parseFloat(row[2]) || 0,
-      bomErros:  parseFloat(row[3]) || 0,
-      minPlan:   parseFloat(row[4]) || 0,
-      minReal:   parseFloat(row[5]) || 0,
-      efic:      parseFloat(row[6]) || 0,
-    });
-  }
-  return result.length > 0 ? result : DEMO_DATA;
-}
-
-// ─── RENDER ALL ──────────────────────────────────────────────────────────────
+// ── RENDER ────────────────────────────────────────────────────────────────────
 function renderAll() {
   if (!rawData) return;
+  const ini = parseInt(document.getElementById('mes-inicio').value);
+  const fim = parseInt(document.getElementById('mes-fim').value);
+  const filtered = rawData.filter((_,i) => i >= ini && i <= fim);
+  const labels   = filtered.map(d => d.mes);
 
-  const inicio = parseInt(document.getElementById('mes-inicio').value);
-  const fim    = parseInt(document.getElementById('mes-fim').value);
-  const filtered = rawData.filter((_, i) => i >= inicio && i <= fim);
-  const labels = filtered.map(d => d.mes);
-
-  const totQty  = filtered.reduce((a,d) => a + d.scrapQty, 0);
-  const totCost = filtered.reduce((a,d) => a + d.scrapCost, 0);
-  const totBom  = filtered.reduce((a,d) => a + d.bomErros, 0);
-
-  // Custo unitário = custo total / quantidade (apenas meses com ambos > 0)
+  const totQty  = filtered.reduce((a,d)=>a+d.scrapQty, 0);
+  const totCost = filtered.reduce((a,d)=>a+d.scrapCost, 0);
+  const totBom  = filtered.reduce((a,d)=>a+d.bomErros, 0);
   const custoUnit = totQty > 0 ? totCost / totQty : 0;
 
-  // Eficiência: calcula de minPlan/minReal quando disponível, senão usa coluna efic
-  const eficMeses = filtered.map(d => {
-    if (d.minPlan > 0 && d.minReal > 0) return d.minReal / d.minPlan * 100;
+  const eficArr = filtered.map(d => {
+    if (d.minPlan > 0 && d.minReal > 0) return d.minReal/d.minPlan*100;
     if (d.efic > 0) return d.efic;
     return null;
-  });
-  const eficValidos = eficMeses.filter(v => v !== null);
-  const avgEfic = eficValidos.length ? eficValidos.reduce((a,v) => a+v, 0) / eficValidos.length : 0;
+  }).filter(v=>v!==null);
+  const avgEfic = eficArr.length ? eficArr.reduce((a,v)=>a+v,0)/eficArr.length : 0;
 
-  // Metas
-  const mUnit = parseFloat(document.getElementById('meta-scrap-qty').value)  || 10;
+  const mUnit = parseFloat(document.getElementById('meta-scrap-qty').value) || 10;
   const mCost = parseFloat(document.getElementById('meta-scrap-cost').value) || 1000;
-  const mBom  = parseFloat(document.getElementById('meta-bom').value)        || 0;
-  const mEfic = parseFloat(document.getElementById('meta-efic').value)       || 95;
+  const mBom  = parseFloat(document.getElementById('meta-bom').value) || 0;
+  const mEfic = parseFloat(document.getElementById('meta-efic').value) || 95;
 
-  // KPI Cards
-  // Card 1: Custo Unitário
-  const cuLabel = `R$ ${custoUnit.toFixed(2)}/un`;
-  setKPI('scrap-qty', cuLabel,
-    custoUnit > mUnit ? 'bad' : custoUnit === 0 ? 'warn' : 'ok',
-    custoUnit === 0 ? '— Sem dados' :
-    custoUnit > mUnit ? `⚠ Acima da meta` : `✓ Dentro da meta`,
+  // KPI 1: Custo Unitário
+  setKPI('scrap-unit',
+    `<sup>R$</sup>${custoUnit.toFixed(2)}<span style="font-size:14px;color:var(--muted)">/un</span>`,
+    custoUnit > mUnit ? 'bad' : custoUnit===0 ? 'warn' : 'ok',
+    custoUnit===0 ? '— Sem dados' : custoUnit>mUnit ? '⚠ Acima da meta' : '✓ Dentro da meta',
     `R$${mUnit.toFixed(2)}/un`);
 
-  // Card 2: Custo Total — valor real formatado
-  setKPI('scrap-cost', totCost,
+  // KPI 2: Custo Total
+  setKPI('scrap-cost',
+    `<sup>R$</sup>${totCost.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}`,
     totCost > mCost ? 'bad' : 'ok',
-    totCost > mCost ? `⚠ Acima da meta` : `✓ Dentro da meta`,
+    totCost > mCost ? '⚠ Acima da meta' : '✓ Dentro da meta',
     `R$${fmt(mCost)}`);
 
+  // KPI 3: BOM
   setKPI('bom', totBom,
     totBom > mBom ? 'bad' : 'ok',
-    totBom > mBom ? `⚠ ${totBom} erros encontrados` : `✓ Dentro da meta`,
+    totBom > mBom ? `⚠ ${totBom} erros encontrados` : '✓ Dentro da meta',
     mBom);
 
-  const eficRound = avgEfic.toFixed(1);
-  setKPI('efic', eficRound,
-    avgEfic < mEfic && avgEfic > 0 ? 'bad' : avgEfic === 0 ? 'warn' : 'ok',
-    avgEfic === 0 ? '— Sem dados no período' :
-    avgEfic < mEfic ? `⚠ ${eficRound}% — abaixo da meta` : `✓ ${eficRound}% — na meta`,
+  // KPI 4: Eficiência
+  setKPI('efic',
+    `${avgEfic.toFixed(1)}<sup>%</sup>`,
+    avgEfic<mEfic&&avgEfic>0 ? 'bad' : avgEfic===0 ? 'warn' : 'ok',
+    avgEfic===0 ? '— Sem dados' : avgEfic<mEfic ? `⚠ ${avgEfic.toFixed(1)}% — abaixo da meta` : `✓ ${avgEfic.toFixed(1)}% — na meta`,
     mEfic+'%');
 
   // Charts
-  drawScrapChart(labels, filtered, mCost);
   drawScrapUnitChart(labels, filtered, mUnit);
-  drawEficChart(labels, filtered, mEfic);
+  drawScrapChart(labels, filtered, mCost);
   drawBomChart(labels, filtered);
+  drawEficChart(labels, filtered, mEfic);
+
+  // Pareto & Tempo (usa dados agregados do período ou do último mês com dados)
+  renderPareto(filtered);
+  renderTempoSeparacao(filtered);
 }
 
-function fmt(v) {
-  if (v >= 1000) return (v/1000).toFixed(1)+'k';
-  return v.toFixed(0);
-}
+function fmt(v) { return v>=1000 ? (v/1000).toFixed(1)+'k' : v.toFixed(0); }
 
-function setKPI(id, value, status, statusText, meta) {
-  const v = document.getElementById('v-'+id);
+function setKPI(id, htmlVal, status, statusText, meta) {
+  document.getElementById('v-'+id).innerHTML = String(htmlVal);
   const s = document.getElementById('s-'+id);
-  const m = document.getElementById('m-'+id);
-
-  if (id === 'scrap-qty') {
-    // Custo unitário: já vem formatado como string "R$ X.XX/un"
-    v.innerHTML = String(value).replace('R$ ', '<sup>R$</sup> ');
-  } else if (id === 'scrap-cost') {
-    // Custo total: exibe valor real completo
-    const num = parseFloat(value) || 0;
-    v.innerHTML = `<sup>R$</sup>${num.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
-  } else if (id === 'efic') {
-    v.innerHTML = String(value) + `<sup>%</sup>`;
-  } else {
-    v.textContent = value;
-  }
-  s.className = 'kpi-status ' + status;
+  s.className = 'kpi-status '+status;
   s.innerHTML = `<span class="dot"></span> ${statusText}`;
+  const m = document.getElementById('m-'+id);
   if (m) m.textContent = meta;
 }
 
-// ─── CHARTS ──────────────────────────────────────────────────────────────────
-const CHART_DEFAULTS = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: { legend: { display: false }, tooltip: {
-    backgroundColor: '#1e2330',
-    titleColor: '#f5a623',
-    bodyColor: '#e8ecf4',
-    borderColor: '#f5a623',
-    borderWidth: 1,
-  }},
-  scales: {
-    x: { grid: { color: '#1e2330' }, ticks: { color: '#6b7590', font: { family: 'Barlow Condensed', size: 11 } } },
-    y: { grid: { color: '#1e2330' }, ticks: { color: '#6b7590', font: { family: 'Barlow Condensed', size: 11 } } },
-  }
-};
+// ── PARETO ───────────────────────────────────────────────────────────────────
+function renderPareto(filtered) {
+  // Tenta usar campo pareto do JSON (calculado pelo Apps Script)
+  // Se não existir, usa dados agregados do período
+  const container = document.getElementById('pareto-container');
 
-function drawScrapChart(labels, data, meta) {
-  const ctx = document.getElementById('chart-scrap').getContext('2d');
-  if (charts.scrap) charts.scrap.destroy();
-  charts.scrap = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Custo R$',
-          data: data.map(d => d.scrapCost),
-          backgroundColor: data.map(d => d.scrapCost > meta ? 'rgba(231,76,60,0.7)' : 'rgba(245,166,35,0.6)'),
-          borderColor:     data.map(d => d.scrapCost > meta ? '#e74c3c' : '#f5a623'),
-          borderWidth: 1,
-          yAxisID: 'y',
-        },
-        {
-          label: 'Qtd peças',
-          data: data.map(d => d.scrapQty),
-          type: 'line',
-          borderColor: '#6b7590',
-          backgroundColor: 'transparent',
-          pointBackgroundColor: '#6b7590',
-          pointRadius: 3,
-          tension: 0.3,
-          yAxisID: 'y2',
-        }
-      ]
-    },
-    options: {
-      ...CHART_DEFAULTS,
-      scales: {
-        ...CHART_DEFAULTS.scales,
-        y:  { ...CHART_DEFAULTS.scales.y, position: 'left',  title: { display:true, text:'R$', color:'#6b7590', font:{size:10} } },
-        y2: { ...CHART_DEFAULTS.scales.y, position: 'right', grid:{display:false}, title: { display:true, text:'Qtd', color:'#6b7590', font:{size:10} } },
-      }
+  // Agrupa pareto de todos os meses do período
+  const allPareto = {};
+  filtered.forEach(d => {
+    if (d.pareto && typeof d.pareto === 'object') {
+      Object.entries(d.pareto).forEach(([k,v]) => {
+        allPareto[k] = (allPareto[k]||0) + v;
+      });
     }
   });
+
+  const hasPareto = Object.keys(allPareto).length > 0;
+
+  if (!hasPareto) {
+    container.innerHTML = `<div style="color:var(--muted);font-size:11px;line-height:1.8">
+      Pareto será calculado automaticamente<br>quando o script for atualizado.<br><br>
+      <span style="color:var(--accent)">Top defeitos históricos (Abr):</span><br>
+      <span style="color:var(--text)">• Falha na produção</span><br>
+      <span style="color:var(--text)">• Queimado</span><br>
+      <span style="color:var(--text)">• Deformidade</span><br>
+      <span style="color:var(--text)">• Rigidez</span>
+    </div>`;
+    return;
+  }
+
+  const sorted = Object.entries(allPareto).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const total  = Object.values(allPareto).reduce((a,v)=>a+v,0);
+
+  container.innerHTML = sorted.map(([name, qty]) => {
+    const pct = total > 0 ? (qty/total*100).toFixed(1) : 0;
+    return `<div class="pareto-item">
+      <div class="pareto-header">
+        <span class="pareto-name">${name}</span>
+        <span class="pareto-pct">${pct}% <span style="color:var(--muted);font-size:10px">(${qty}pçs)</span></span>
+      </div>
+      <div class="pareto-bar-bg">
+        <div class="pareto-bar-fill" style="width:${pct}%"></div>
+      </div>
+    </div>`;
+  }).join('');
 }
+
+// ── TEMPO SEPARAÇÃO ──────────────────────────────────────────────────────────
+function renderTempoSeparacao(filtered) {
+  // Usa campo tempoSep do JSON se disponível
+  const tempos = filtered.filter(d => d.tempoSep && d.tempoSep.media > 0).map(d => d.tempoSep);
+
+  if (!tempos.length) {
+    document.getElementById('tempo-medio').textContent = '—';
+    document.getElementById('tempo-min').textContent = '—';
+    document.getElementById('tempo-max').textContent = '—';
+    document.getElementById('tempo-total').textContent = '—';
+    return;
+  }
+
+  const media = tempos.reduce((a,t)=>a+t.media,0)/tempos.length;
+  const minVal = Math.min(...tempos.map(t=>t.min));
+  const maxVal = Math.max(...tempos.map(t=>t.max));
+  const totalReqs = tempos.reduce((a,t)=>a+(t.total||0),0);
+
+  const fmtH = v => v < 1 ? `${Math.round(v*60)}min` : `${v.toFixed(1)}h`;
+
+  document.getElementById('tempo-medio').textContent = fmtH(media);
+  document.getElementById('tempo-min').textContent = fmtH(minVal);
+  document.getElementById('tempo-max').textContent = fmtH(maxVal);
+  document.getElementById('tempo-total').textContent = totalReqs;
+}
+
+// ── CHARTS ───────────────────────────────────────────────────────────────────
+const CD = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend:{display:false}, tooltip:{backgroundColor:'#1e2330',titleColor:'#f5a623',bodyColor:'#e8ecf4',borderColor:'#f5a623',borderWidth:1}},
+  scales: {
+    x:{grid:{color:'#1e2330'},ticks:{color:'#6b7590',font:{family:'Barlow Condensed',size:11}}},
+    y:{grid:{color:'#1e2330'},ticks:{color:'#6b7590',font:{family:'Barlow Condensed',size:11}}}
+  }
+};
 
 function drawScrapUnitChart(labels, data, meta) {
   const ctx = document.getElementById('chart-scrap-unit').getContext('2d');
   if (charts.scrapUnit) charts.scrapUnit.destroy();
-  const unitData = data.map(d => d.scrapQty > 0 ? parseFloat((d.scrapCost / d.scrapQty).toFixed(2)) : null);
-  charts.scrapUnit = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: 'R$/un',
-        data: unitData,
-        borderColor: '#e74c3c',
-        backgroundColor: 'rgba(231,76,60,0.08)',
-        fill: true,
-        tension: 0.3,
-        pointBackgroundColor: unitData.map(v => v !== null && v > meta ? '#e74c3c' : '#f5a623'),
-        pointRadius: 4,
-      },{
-        label: 'Meta',
-        data: data.map(() => meta),
-        borderColor: 'rgba(245,166,35,0.4)',
-        borderDash: [4,4],
-        borderWidth: 1,
-        pointRadius: 0,
-        fill: false,
-      }]
-    },
-    options: CHART_DEFAULTS
-  });
+  const unitData = data.map(d => d.scrapQty>0 ? parseFloat((d.scrapCost/d.scrapQty).toFixed(2)) : null);
+  charts.scrapUnit = new Chart(ctx, { type:'line', data:{ labels, datasets:[
+    { data:unitData, borderColor:'#e74c3c', backgroundColor:'rgba(231,76,60,.08)', fill:true, tension:.3,
+      pointBackgroundColor:unitData.map(v=>v!==null&&v>meta?'#e74c3c':'#f5a623'), pointRadius:4 },
+    { data:data.map(()=>meta), borderColor:'rgba(245,166,35,.4)', borderDash:[4,4], borderWidth:1, pointRadius:0, fill:false }
+  ]}, options:CD });
 }
 
-function drawEficChart(labels, data, meta) {
-  const ctx = document.getElementById('chart-efic').getContext('2d');
-  if (charts.efic) charts.efic.destroy();
-  // Calcula eficiência por mês: prefere minPlan/minReal, fallback para coluna efic
-  const eficPorMes = data.map(d => {
-    if (d.minPlan > 0 && d.minReal > 0) return parseFloat((d.minReal / d.minPlan * 100).toFixed(2));
-    if (d.efic > 0) return d.efic;
-    return null;
-  });
-  charts.efic = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Eficiência %',
-          data: eficPorMes,
-          borderColor: '#2ecc71',
-          backgroundColor: 'rgba(46,204,113,0.08)',
-          fill: true,
-          tension: 0.3,
-          pointBackgroundColor: data.map(d => d.efic > 0 && d.efic < meta ? '#e74c3c' : '#2ecc71'),
-          pointRadius: 4,
-        },
-        {
-          label: 'Meta',
-          data: data.map(() => meta),
-          borderColor: 'rgba(245,166,35,0.4)',
-          borderDash: [4,4],
-          borderWidth: 1,
-          pointRadius: 0,
-          fill: false,
-        }
-      ]
-    },
-    options: CHART_DEFAULTS
-  });
+function drawScrapChart(labels, data, meta) {
+  const ctx = document.getElementById('chart-scrap').getContext('2d');
+  if (charts.scrap) charts.scrap.destroy();
+  charts.scrap = new Chart(ctx, { type:'bar', data:{ labels, datasets:[
+    { data:data.map(d=>d.scrapCost),
+      backgroundColor:data.map(d=>d.scrapCost>meta?'rgba(231,76,60,.7)':'rgba(245,166,35,.6)'),
+      borderColor:data.map(d=>d.scrapCost>meta?'#e74c3c':'#f5a623'), borderWidth:1 }
+  ]}, options:CD });
 }
 
 function drawBomChart(labels, data) {
   const ctx = document.getElementById('chart-bom').getContext('2d');
   if (charts.bom) charts.bom.destroy();
-  charts.bom = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Erros BOM',
-        data: data.map(d => d.bomErros),
-        backgroundColor: data.map(d => d.bomErros > 0 ? 'rgba(52,152,219,0.7)' : 'rgba(52,152,219,0.2)'),
-        borderColor: '#3498db',
-        borderWidth: 1,
-        borderRadius: 2,
-      }]
-    },
-    options: CHART_DEFAULTS
+  charts.bom = new Chart(ctx, { type:'bar', data:{ labels, datasets:[
+    { data:data.map(d=>d.bomErros),
+      backgroundColor:data.map(d=>d.bomErros>0?'rgba(52,152,219,.7)':'rgba(52,152,219,.2)'),
+      borderColor:'#3498db', borderWidth:1, borderRadius:2 }
+  ]}, options:CD });
+}
+
+function drawEficChart(labels, data, meta) {
+  const ctx = document.getElementById('chart-efic').getContext('2d');
+  if (charts.efic) charts.efic.destroy();
+  const eficData = data.map(d => {
+    if (d.minPlan>0&&d.minReal>0) return parseFloat((d.minReal/d.minPlan*100).toFixed(2));
+    if (d.efic>0) return d.efic;
+    return null;
   });
+  charts.efic = new Chart(ctx, { type:'line', data:{ labels, datasets:[
+    { data:eficData, borderColor:'#2ecc71', backgroundColor:'rgba(46,204,113,.08)', fill:true, tension:.3,
+      pointBackgroundColor:eficData.map(v=>v!==null&&v<meta?'#e74c3c':'#2ecc71'), pointRadius:4 },
+    { data:data.map(()=>meta), borderColor:'rgba(245,166,35,.4)', borderDash:[4,4], borderWidth:1, pointRadius:0, fill:false }
+  ]}, options:CD });
 }
 
-// ─── STATUS ──────────────────────────────────────────────────────────────────
+// ── STATUS ────────────────────────────────────────────────────────────────────
 function setStatus(text, type) {
+  document.getElementById('status-text').textContent = text;
   const dot = document.getElementById('status-dot');
-  const txt = document.getElementById('status-text');
-  txt.textContent = text;
-  dot.style.background = type === 'ok' ? 'var(--green)' : type === 'bad' ? 'var(--red)' : 'var(--yellow)';
-  dot.style.boxShadow  = type === 'ok' ? '0 0 8px var(--green)' : type === 'bad' ? '0 0 8px var(--red)' : '0 0 8px var(--yellow)';
+  const colors = {ok:'var(--green)',bad:'var(--red)',warn:'var(--yellow)'};
+  dot.style.background = colors[type];
+  dot.style.boxShadow  = `0 0 8px ${colors[type]}`;
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
   const saved = localStorage.getItem('brilia_sheets_url');
   if (saved) document.getElementById('sheets-url').value = saved;
   loadData();
 });
-
 document.getElementById('mes-inicio').addEventListener('change', renderAll);
 document.getElementById('mes-fim').addEventListener('change', renderAll);
 </script>
