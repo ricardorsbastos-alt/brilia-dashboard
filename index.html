@@ -1,386 +1,641 @@
-// =============================================================================
-// BRILIA — Dashboard KPI 2026 — v4
-// Inclui: Pareto de Defeitos + Tempo Médio de Separação
-// =============================================================================
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRILIA — Dashboard KPI 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0c10;
+  --surface: #111318;
+  --surface2: #181c24;
+  --border: #1e2330;
+  --accent: #f5a623;
+  --green: #2ecc71;
+  --red: #e74c3c;
+  --yellow: #f39c12;
+  --blue: #3498db;
+  --teal: #1abc9c;
+  --purple: #9b59b6;
+  --text: #e8ecf4;
+  --muted: #6b7590;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; font-size: 13px; min-height: 100vh; overflow-x: hidden; }
 
-const SHEET_DASHBOARD = 'DASHBOARD';
-const SHEET_SCRAP_RAW = 'SCRAP_RAW';
-const SHEET_SAP_RAW   = 'SAP_RAW';
-const SHEET_BOM_RAW   = 'BOM_RAW';
-const ID_REQUISICOES  = '1B8rZs4K-WRBOIFa1ocrrBrkjRKhg3g0H0HR0iYOKqio';
-const ABA_REQUISICOES = 'Requisicoes';
+/* HEADER */
+.header { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid var(--border); background: var(--surface); position: relative; }
+.header::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent) 0%, transparent 60%); }
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 22px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; }
+.brand-tagline { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+.header-center { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.status-text { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+#clock { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: 2px; }
+
+/* PERIOD BAR */
+.period-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 28px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+.period-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+.period-controls { display: flex; align-items: center; gap: 10px; }
+.period-controls select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 4px 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; border-radius: 3px; cursor: pointer; outline: none; }
+.period-controls select:focus { border-color: var(--accent); }
+.refresh-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 12px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border-radius: 3px; transition: all .2s; }
+.refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* CONFIG BAR */
+.config-bar { padding: 8px 28px; background: #0d1018; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.config-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+.config-input { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 4px 10px; font-size: 11px; border-radius: 3px; outline: none; }
+.config-input:focus { border-color: var(--accent); color: var(--text); }
+.config-apply { background: var(--accent); color: #000; border: none; padding: 5px 14px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; font-weight: 700; cursor: pointer; border-radius: 3px; }
+.config-apply:hover { opacity: .85; }
+
+/* MAIN */
+.main { padding: 16px 28px; display: flex; flex-direction: column; gap: 14px; }
+
+/* KPI GRID */
+.kpi-col-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.kpi-col { display: flex; flex-direction: column; gap: 10px; }
+
+/* KPI CARD */
+.kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px 14px; position: relative; overflow: hidden; }
+.kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.kpi-card.c-red::before { background: var(--red); }
+.kpi-card.c-yellow::before { background: var(--yellow); }
+.kpi-card.c-blue::before { background: var(--blue); }
+.kpi-card.c-green::before { background: var(--green); }
+.kpi-card.c-teal::before { background: var(--teal); }
+.kpi-card.c-purple::before { background: var(--purple); }
+.kpi-icon { font-size: 15px; margin-bottom: 6px; opacity: .7; }
+.kpi-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
+.kpi-value { font-family: 'Barlow Condensed', sans-serif; font-size: 34px; font-weight: 700; line-height: 1; color: var(--text); }
+.kpi-value sup { font-size: 12px; font-weight: 400; color: var(--muted); vertical-align: super; }
+.kpi-status { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; }
+.kpi-status.ok { background: rgba(46,204,113,.12); color: var(--green); }
+.kpi-status.bad { background: rgba(231,76,60,.12); color: var(--red); }
+.kpi-status.warn { background: rgba(243,156,18,.12); color: var(--yellow); }
+.kpi-status.info { background: rgba(52,152,219,.12); color: var(--blue); }
+.kpi-status .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.kpi-meta { position: absolute; bottom: 12px; right: 14px; font-size: 10px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; }
+
+/* CHART CARD */
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+.chart-title { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.chart-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+canvas { display: block; }
+
+/* SECOND ROW: Pareto + Tempo Separação + PSP */
+.secondary-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* PARETO */
+.pareto-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; }
+.pareto-title { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.pareto-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.pareto-item { margin-bottom: 10px; }
+.pareto-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.pareto-name { font-size: 11px; color: var(--text); }
+.pareto-pct { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: var(--accent); font-weight: 600; }
+.pareto-bar-bg { background: var(--border); border-radius: 2px; height: 4px; }
+.pareto-bar-fill { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--red), var(--accent)); transition: width .5s ease; }
+
+/* TEMPO SEPARAÇÃO */
+.tempo-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; }
+.tempo-title { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.tempo-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.tempo-big { font-family: 'Barlow Condensed', sans-serif; font-size: 48px; font-weight: 700; color: var(--teal); line-height: 1; }
+.tempo-unit { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.tempo-sub { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tempo-sub-item { background: var(--surface2); border-radius: 3px; padding: 8px 10px; }
+.tempo-sub-label { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+.tempo-sub-val { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 600; color: var(--text); }
+
+/* PSP */
+.psp-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; border-left: 3px solid var(--purple); }
+.psp-title { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; }
+.psp-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(155,89,182,.15); border: 1px solid rgba(155,89,182,.3); border-radius: 3px; padding: 6px 12px; margin-bottom: 12px; }
+.psp-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--purple); animation: pulse 2s infinite; }
+.psp-badge-text { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 2px; color: var(--purple); text-transform: uppercase; }
+.psp-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+.psp-desc strong { color: var(--text); }
+
+/* METAS */
+.metas-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.meta-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; }
+.meta-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif; min-width: 80px; }
+.meta-input { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--accent); padding: 3px 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; text-align: right; border-radius: 2px; outline: none; width: 80px; }
+.meta-input:focus { border-color: var(--accent); }
+
+/* FOOTER */
+.footer { padding: 10px 28px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.footer-text { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+#last-update { color: var(--accent); }
+
+@media (min-width: 1600px) { .kpi-value { font-size: 42px; } }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="brand">
+    <span class="brand-name">BRILIA</span>
+    <span class="brand-tagline">Luz muda tudo</span>
+  </div>
+  <div class="header-center">DASHBOARD DE INDICADORES — 2026</div>
+  <div class="header-right">
+    <div class="status-dot" id="status-dot"></div>
+    <span class="status-text" id="status-text">CONECTANDO...</span>
+    <span id="clock">--:--:--</span>
+  </div>
+</div>
+
+<!-- PERIOD BAR -->
+<div class="period-bar">
+  <span class="period-label">⬦ Período de análise</span>
+  <div class="period-controls">
+    <select id="mes-inicio">
+      <option value="0">Jan</option><option value="1">Fev</option>
+      <option value="2">Mar</option><option value="3">Abr</option>
+      <option value="4">Mai</option><option value="5">Jun</option>
+      <option value="6">Jul</option><option value="7">Ago</option>
+      <option value="8">Set</option><option value="9">Out</option>
+      <option value="10">Nov</option><option value="11">Dez</option>
+    </select>
+    <span style="color:var(--muted)">→</span>
+    <select id="mes-fim">
+      <option value="0">Jan</option><option value="1">Fev</option>
+      <option value="2">Mar</option><option value="3">Abr</option>
+      <option value="4" selected>Mai</option><option value="5">Jun</option>
+      <option value="6">Jul</option><option value="7">Ago</option>
+      <option value="8">Set</option><option value="9">Out</option>
+      <option value="10">Nov</option><option value="11">Dez</option>
+    </select>
+    <button class="refresh-btn" onclick="loadData()">↺ ATUALIZAR</button>
+  </div>
+</div>
+
+<!-- CONFIG BAR -->
+<div class="config-bar">
+  <span class="config-label">⬦ Google Sheets URL</span>
+  <input type="text" class="config-input" id="sheets-url"
+    value="https://script.google.com/macros/s/AKfycby1DqOThSoS9fBW9j5ffDl_YWHa6BvcaTWI0He3UED2WL21ibpulbOgrd9nOP8W8Y4B/exec"
+    placeholder="Cole aqui a URL do Apps Script...">
+  <button class="config-apply" onclick="saveAndLoad()">APLICAR</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ROW 1: KPIs + Charts -->
+  <div class="kpi-col-grid">
+
+    <!-- COL 1: Custo Unitário -->
+    <div class="kpi-col">
+      <div class="kpi-card c-red">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-label">Custo Unitário Scrap</div>
+        <div class="kpi-value" id="v-scrap-unit">—</div>
+        <div class="kpi-status" id="s-scrap-unit"><span class="dot"></span> Aguardando</div>
+        <div class="kpi-meta">META: <span id="m-scrap-unit">—</span></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Custo Unitário / Mês</div>
+        <canvas id="chart-scrap-unit" height="130"></canvas>
+      </div>
+    </div>
+
+    <!-- COL 2: Custo Total -->
+    <div class="kpi-col">
+      <div class="kpi-card c-yellow">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-label">Scrap — Custo Total</div>
+        <div class="kpi-value" id="v-scrap-cost"><sup>R$</sup>—</div>
+        <div class="kpi-status" id="s-scrap-cost"><span class="dot"></span> Aguardando</div>
+        <div class="kpi-meta">META: <span id="m-scrap-cost">—</span></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Scrap Custo / Mês</div>
+        <canvas id="chart-scrap" height="130"></canvas>
+      </div>
+    </div>
+
+    <!-- COL 3: Erros BOM -->
+    <div class="kpi-col">
+      <div class="kpi-card c-blue">
+        <div class="kpi-icon">📋</div>
+        <div class="kpi-label">Erros de BOM</div>
+        <div class="kpi-value" id="v-bom">—</div>
+        <div class="kpi-status" id="s-bom"><span class="dot"></span> Aguardando</div>
+        <div class="kpi-meta">META: <span id="m-bom">—</span></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Erros de BOM / Mês</div>
+        <canvas id="chart-bom" height="130"></canvas>
+      </div>
+    </div>
+
+    <!-- COL 4: Eficiência -->
+    <div class="kpi-col">
+      <div class="kpi-card c-green">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-label">Eficiência Minutos</div>
+        <div class="kpi-value" id="v-efic">—<sup>%</sup></div>
+        <div class="kpi-status" id="s-efic"><span class="dot"></span> Aguardando</div>
+        <div class="kpi-meta">META: <span id="m-efic">—</span></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Eficiência % / Mês</div>
+        <canvas id="chart-efic" height="130"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW 2: Pareto + Tempo Separação + PSP -->
+  <div class="secondary-row">
+
+    <!-- PARETO DE DEFEITOS -->
+    <div class="pareto-card">
+      <div class="pareto-title">🔬 Pareto de Defeitos — Scrap</div>
+      <div id="pareto-container">
+        <div style="color:var(--muted);font-size:11px;">Carregando...</div>
+      </div>
+    </div>
+
+    <!-- TEMPO DE SEPARAÇÃO -->
+    <div class="tempo-card">
+      <div class="tempo-title">⏱ Tempo Médio de Separação — Almox</div>
+      <div class="tempo-big" id="tempo-medio">—</div>
+      <div class="tempo-unit">horas em média por requisição</div>
+      <div class="tempo-sub">
+        <div class="tempo-sub-item">
+          <div class="tempo-sub-label">Mais rápida</div>
+          <div class="tempo-sub-val" id="tempo-min">—</div>
+        </div>
+        <div class="tempo-sub-item">
+          <div class="tempo-sub-label">Mais lenta</div>
+          <div class="tempo-sub-val" id="tempo-max">—</div>
+        </div>
+        <div class="tempo-sub-item">
+          <div class="tempo-sub-label">Requisições</div>
+          <div class="tempo-sub-val" id="tempo-total">—</div>
+        </div>
+        <div class="tempo-sub-item">
+          <div class="tempo-sub-label">Meta (h)</div>
+          <div class="tempo-sub-val" id="tempo-meta-val">4h</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PSP -->
+    <div class="psp-card">
+      <div class="psp-title">🛡 PSP — Plano de Solução de Problemas</div>
+      <div class="psp-badge">
+        <div class="psp-badge-dot"></div>
+        <span class="psp-badge-text">Em implantação</span>
+      </div>
+      <div class="psp-desc">
+        A metodologia <strong>PSP</strong> está sendo estruturada para a planta de Navegantes.<br><br>
+        Em breve este painel exibirá:<br>
+        • Problemas abertos por área<br>
+        • Tempo médio de resolução<br>
+        • Taxa de recorrência<br><br>
+        <span style="color:var(--purple)">Previsão de ativação: Q3 2026</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- METAS -->
+  <div class="metas-row">
+    <div class="meta-block">
+      <span class="meta-label">Meta C. Unit. R$</span>
+      <input type="number" class="meta-input" id="meta-scrap-qty" value="10" onchange="renderAll()">
+    </div>
+    <div class="meta-block">
+      <span class="meta-label">Meta Scrap R$</span>
+      <input type="number" class="meta-input" id="meta-scrap-cost" value="1000" onchange="renderAll()">
+    </div>
+    <div class="meta-block">
+      <span class="meta-label">Meta BOM Erros</span>
+      <input type="number" class="meta-input" id="meta-bom" value="0" onchange="renderAll()">
+    </div>
+    <div class="meta-block">
+      <span class="meta-label">Meta Efic. %</span>
+      <input type="number" class="meta-input" id="meta-efic" value="95" onchange="renderAll()">
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-text">BRILIA LUMINÁRIAS · Navegantes, SC · Coordenação de Processos e Melhoria Contínua</span>
+  <span class="footer-text">Última atualização: <span id="last-update">—</span></span>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
 const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const REFRESH_INTERVAL = 60;
+let charts = {};
+let rawData = null;
+let countdown = REFRESH_INTERVAL;
 
-// =============================================================================
-// doGet — retorna JSON completo para o dashboard do CEO
-// =============================================================================
-function doGet() {
-  const ss   = SpreadsheetApp.getActiveSpreadsheet();
-  const dash = ss.getSheetByName(SHEET_DASHBOARD);
-  const data = dash.getDataRange().getValues();
+const DEMO_DATA = [
+  { mes:'Jan', scrapQty:204, scrapCost:1672.69, bomErros:0, minPlan:0, minReal:0, efic:0 },
+  { mes:'Fev', scrapQty:61,  scrapCost:632.85,  bomErros:0, minPlan:0, minReal:0, efic:0 },
+  { mes:'Mar', scrapQty:182, scrapCost:3799.46, bomErros:0, minPlan:0, minReal:0, efic:0 },
+  { mes:'Abr', scrapQty:204, scrapCost:1623.89, bomErros:5, minPlan:70896, minReal:71620.74, efic:101.02 },
+  { mes:'Mai', scrapQty:0,   scrapCost:0,        bomErros:1, minPlan:23632, minReal:15539, efic:0 },
+  ...Array(7).fill(null).map((_,i)=>({mes:MESES[5+i],scrapQty:0,scrapCost:0,bomErros:0,minPlan:0,minReal:0,efic:0}))
+];
 
-  // Encontra linha inicial (Jan)
-  let headerRow = -1;
-  for (let i = 0; i < data.length; i++) {
-    const cell = String(data[i][0]).toLowerCase();
-    if (cell.includes('jan') || cell.includes('fev')) { headerRow = i; break; }
-  }
-  if (headerRow === -1) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ erro: 'Linha Jan não encontrada' }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+// ── CLOCK ────────────────────────────────────────────────────────────────────
+function updateClock() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateClock, 1000); updateClock();
+setInterval(()=>{ if(--countdown<=0){countdown=REFRESH_INTERVAL;loadData();} }, 1000);
 
-  // Calcula Pareto por mês
-  const paretoPorMes = calcularParetoPorMes();
-
-  // Calcula Tempo de Separação por mês
-  const tempoPorMes = calcularTempoPorMes();
-
-  const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-  const rows  = [];
-
-  for (let i = headerRow; i < data.length; i++) {
-    const row = data[i];
-    const mes = String(row[0]).toLowerCase();
-    const mesIdx = meses.findIndex(m => mes.includes(m));
-    if (mesIdx === -1) continue;
-
-    rows.push({
-      mes:       String(row[0]),
-      scrapQty:  Number(row[1]) || 0,
-      scrapCost: Number(row[2]) || 0,
-      bomErros:  Number(row[3]) || 0,
-      minPlan:   Number(row[4]) || 0,
-      minReal:   Number(row[5]) || 0,
-      efic:      Number(row[6]) || 0,
-      pareto:    paretoPorMes[mesIdx] || null,
-      tempoSep:  tempoPorMes[mesIdx]  || null,
-    });
-  }
-
-  return ContentService
-    .createTextOutput(JSON.stringify(rows))
-    .setMimeType(ContentService.MimeType.JSON);
+// ── SAVE & LOAD ───────────────────────────────────────────────────────────────
+function saveAndLoad() {
+  const url = document.getElementById('sheets-url').value.trim();
+  if (url) localStorage.setItem('brilia_sheets_url', url);
+  loadData();
 }
 
-// =============================================================================
-// calcularParetoPorMes — conta defeitos por mês da SCRAP_RAW
-// =============================================================================
-function calcularParetoPorMes() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const wsRaw = ss.getSheetByName(SHEET_SCRAP_RAW);
-  if (!wsRaw) return {};
-
-  const data = wsRaw.getDataRange().getValues();
-  const result = {}; // { mesIdx: { defeito: count } }
-
-  for (let i = 1; i < data.length; i++) {
-    const dateVal = data[i][0];
-    const defeito = String(data[i][3]).trim(); // Col D = Defeito
-    const qty     = Number(data[i][4]) || 1;   // Col E = QTD
-
-    if (!dateVal || !defeito || defeito === '') continue;
-
-    let date;
-    try { date = new Date(dateVal); if (isNaN(date.getTime())) continue; } catch(e) { continue; }
-    if (date.getFullYear() !== 2026) continue;
-
-    const m = date.getMonth();
-    if (!result[m]) result[m] = {};
-    result[m][defeito] = (result[m][defeito] || 0) + qty;
-  }
-
-  return result;
-}
-
-// =============================================================================
-// calcularTempoPorMes — calcula tempo médio de separação por mês
-// Col L = Timestamp_Separacao, Col M = Timestamp (criação)
-// =============================================================================
-function calcularTempoPorMes() {
-  try {
-    const ssReq = SpreadsheetApp.openById(ID_REQUISICOES);
-    const wsReq = ssReq.getSheetByName(ABA_REQUISICOES);
-    if (!wsReq) return {};
-
-    const data   = wsReq.getDataRange().getValues();
-    const header = data[0].map(h => String(h).toLowerCase().trim());
-
-    // Encontra índices das colunas
-    const colData   = header.indexOf('data');
-    const colTsSep  = header.findIndex(h => h.includes('timestamp_sep') || h.includes('separacao'));
-    const colTs     = header.findIndex(h => h === 'timestamp' || h.includes('timestamp') && !h.includes('sep'));
-
-    if (colTsSep === -1 || colTs === -1) return {};
-
-    const result = {}; // { mesIdx: { tempos: [], total: n } }
-
-    for (let i = 1; i < data.length; i++) {
-      const dateVal  = data[i][colData];
-      const tsSep    = data[i][colTsSep];
-      const tsCreate = data[i][colTs];
-
-      if (!dateVal || !tsSep || !tsCreate) continue;
-
-      let date, dateSep, dateCreate;
-      try {
-        date       = new Date(dateVal);
-        dateSep    = new Date(tsSep);
-        dateCreate = new Date(tsCreate);
-        if (isNaN(date.getTime()) || isNaN(dateSep.getTime()) || isNaN(dateCreate.getTime())) continue;
-      } catch(e) { continue; }
-
-      if (date.getFullYear() !== 2026) continue;
-
-      const diffHoras = (dateSep - dateCreate) / (1000 * 60 * 60);
-      if (diffHoras < 0 || diffHoras > 720) continue; // ignora valores absurdos
-
-      const m = date.getMonth();
-      if (!result[m]) result[m] = { tempos: [], total: 0 };
-      result[m].tempos.push(diffHoras);
-      result[m].total++;
+async function loadData() {
+  const url = localStorage.getItem('brilia_sheets_url') ||
+              document.getElementById('sheets-url').value.trim();
+  if (url) {
+    document.getElementById('sheets-url').value = url;
+    setStatus('BUSCANDO...','warn');
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error('Falha');
+      const json = await resp.json();
+      rawData = json.filter(d => MESES.some(m => String(d.mes).includes(m))).map(d => ({
+        mes: String(d.mes),
+        scrapQty:  parseFloat(d.scrapQty)  || 0,
+        scrapCost: parseFloat(d.scrapCost) || 0,
+        bomErros:  parseFloat(d.bomErros)  || 0,
+        minPlan:   parseFloat(d.minPlan)   || 0,
+        minReal:   parseFloat(d.minReal)   || 0,
+        efic:      parseFloat(d.efic)      || 0,
+        // Novos campos
+        pareto:    d.pareto   || null,
+        tempoSep:  d.tempoSep || null,
+      }));
+      if (!rawData.length) throw new Error('Sem dados');
+      setStatus('ONLINE','ok');
+    } catch(e) {
+      rawData = DEMO_DATA;
+      setStatus('DEMO — '+e.message.substring(0,40),'warn');
     }
-
-    // Calcula médias
-    const summary = {};
-    Object.entries(result).forEach(([m, d]) => {
-      if (d.tempos.length === 0) return;
-      const media = d.tempos.reduce((a,v)=>a+v,0) / d.tempos.length;
-      summary[m] = {
-        media:  parseFloat(media.toFixed(2)),
-        min:    parseFloat(Math.min(...d.tempos).toFixed(2)),
-        max:    parseFloat(Math.max(...d.tempos).toFixed(2)),
-        total:  d.total,
-      };
-    });
-
-    return summary;
-  } catch(e) {
-    return {};
+  } else {
+    rawData = DEMO_DATA;
+    setStatus('DEMO MODE','warn');
   }
+  document.getElementById('last-update').textContent = new Date().toLocaleTimeString('pt-BR');
+  countdown = REFRESH_INTERVAL;
+  renderAll();
 }
 
-// =============================================================================
-// atualizarScrap
-// =============================================================================
-function atualizarScrap() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let wsRaw = ss.getSheetByName(SHEET_SCRAP_RAW);
-  if (!wsRaw) {
-    wsRaw = ss.insertSheet(SHEET_SCRAP_RAW);
-    wsRaw.getRange('A1:G1').setValues([['Data','SKU','Descrição','Defeito','QTD','CustoUn','CustoTotal']]);
-    SpreadsheetApp.getUi().alert('Aba SCRAP_RAW criada!\nCole os dados a partir da linha 2 e execute novamente.');
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderAll() {
+  if (!rawData) return;
+  const ini = parseInt(document.getElementById('mes-inicio').value);
+  const fim = parseInt(document.getElementById('mes-fim').value);
+  const filtered = rawData.filter((_,i) => i >= ini && i <= fim);
+  const labels   = filtered.map(d => d.mes);
+
+  const totQty  = filtered.reduce((a,d)=>a+d.scrapQty, 0);
+  const totCost = filtered.reduce((a,d)=>a+d.scrapCost, 0);
+  const totBom  = filtered.reduce((a,d)=>a+d.bomErros, 0);
+  const custoUnit = totQty > 0 ? totCost / totQty : 0;
+
+  const eficArr = filtered.map(d => {
+    if (d.minPlan > 0 && d.minReal > 0) return d.minReal/d.minPlan*100;
+    if (d.efic > 0) return d.efic;
+    return null;
+  }).filter(v=>v!==null);
+  const avgEfic = eficArr.length ? eficArr.reduce((a,v)=>a+v,0)/eficArr.length : 0;
+
+  const mUnit = parseFloat(document.getElementById('meta-scrap-qty').value) || 10;
+  const mCost = parseFloat(document.getElementById('meta-scrap-cost').value) || 1000;
+  const mBom  = parseFloat(document.getElementById('meta-bom').value) || 0;
+  const mEfic = parseFloat(document.getElementById('meta-efic').value) || 95;
+
+  // KPI 1: Custo Unitário
+  setKPI('scrap-unit',
+    `<sup>R$</sup>${custoUnit.toFixed(2)}<span style="font-size:14px;color:var(--muted)">/un</span>`,
+    custoUnit > mUnit ? 'bad' : custoUnit===0 ? 'warn' : 'ok',
+    custoUnit===0 ? '— Sem dados' : custoUnit>mUnit ? '⚠ Acima da meta' : '✓ Dentro da meta',
+    `R$${mUnit.toFixed(2)}/un`);
+
+  // KPI 2: Custo Total
+  setKPI('scrap-cost',
+    `<sup>R$</sup>${totCost.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}`,
+    totCost > mCost ? 'bad' : 'ok',
+    totCost > mCost ? '⚠ Acima da meta' : '✓ Dentro da meta',
+    `R$${fmt(mCost)}`);
+
+  // KPI 3: BOM
+  setKPI('bom', totBom,
+    totBom > mBom ? 'bad' : 'ok',
+    totBom > mBom ? `⚠ ${totBom} erros encontrados` : '✓ Dentro da meta',
+    mBom);
+
+  // KPI 4: Eficiência
+  setKPI('efic',
+    `${avgEfic.toFixed(1)}<sup>%</sup>`,
+    avgEfic<mEfic&&avgEfic>0 ? 'bad' : avgEfic===0 ? 'warn' : 'ok',
+    avgEfic===0 ? '— Sem dados' : avgEfic<mEfic ? `⚠ ${avgEfic.toFixed(1)}% — abaixo da meta` : `✓ ${avgEfic.toFixed(1)}% — na meta`,
+    mEfic+'%');
+
+  // Charts
+  drawScrapUnitChart(labels, filtered, mUnit);
+  drawScrapChart(labels, filtered, mCost);
+  drawBomChart(labels, filtered);
+  drawEficChart(labels, filtered, mEfic);
+
+  // Pareto & Tempo (usa dados agregados do período ou do último mês com dados)
+  renderPareto(filtered);
+  renderTempoSeparacao(filtered);
+}
+
+function fmt(v) { return v>=1000 ? (v/1000).toFixed(1)+'k' : v.toFixed(0); }
+
+function setKPI(id, htmlVal, status, statusText, meta) {
+  document.getElementById('v-'+id).innerHTML = String(htmlVal);
+  const s = document.getElementById('s-'+id);
+  s.className = 'kpi-status '+status;
+  s.innerHTML = `<span class="dot"></span> ${statusText}`;
+  const m = document.getElementById('m-'+id);
+  if (m) m.textContent = meta;
+}
+
+// ── PARETO ───────────────────────────────────────────────────────────────────
+function renderPareto(filtered) {
+  // Tenta usar campo pareto do JSON (calculado pelo Apps Script)
+  // Se não existir, usa dados agregados do período
+  const container = document.getElementById('pareto-container');
+
+  // Agrupa pareto de todos os meses do período
+  const allPareto = {};
+  filtered.forEach(d => {
+    if (d.pareto && typeof d.pareto === 'object') {
+      Object.entries(d.pareto).forEach(([k,v]) => {
+        allPareto[k] = (allPareto[k]||0) + v;
+      });
+    }
+  });
+
+  const hasPareto = Object.keys(allPareto).length > 0;
+
+  if (!hasPareto) {
+    container.innerHTML = `<div style="color:var(--muted);font-size:11px;line-height:1.8">
+      Pareto será calculado automaticamente<br>quando o script for atualizado.<br><br>
+      <span style="color:var(--accent)">Top defeitos históricos (Abr):</span><br>
+      <span style="color:var(--text)">• Falha na produção</span><br>
+      <span style="color:var(--text)">• Queimado</span><br>
+      <span style="color:var(--text)">• Deformidade</span><br>
+      <span style="color:var(--text)">• Rigidez</span>
+    </div>`;
     return;
   }
-  const data = wsRaw.getDataRange().getValues();
-  if (data.length <= 1) { SpreadsheetApp.getUi().alert('SCRAP_RAW está vazia!'); return; }
 
-  const scrapQTD  = new Array(12).fill(0);
-  const scrapCUST = new Array(12).fill(0);
+  const sorted = Object.entries(allPareto).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const total  = Object.values(allPareto).reduce((a,v)=>a+v,0);
 
-  for (let i = 1; i < data.length; i++) {
-    const dateVal = data[i][0];
-    if (!dateVal) continue;
-    let date;
-    try { date = new Date(dateVal); if (isNaN(date.getTime())) continue; } catch(e) { continue; }
-    if (date.getFullYear() !== 2026) continue;
-    const m = date.getMonth();
-    scrapQTD[m]  += Number(data[i][4]) || 0;
-    const custoStr = String(data[i][6]).replace('R$','').replace(/\./g,'').replace(',','.').trim();
-    scrapCUST[m] += Number(custoStr) || 0;
-  }
-
-  atualizarDashboard('scrap', scrapQTD, scrapCUST);
-  SpreadsheetApp.getUi().alert('✅ Scrap atualizado!\n\n' +
-    MESES.map((m,i) => `${m}: ${scrapQTD[i].toFixed(0)} pçs | R$ ${scrapCUST[i].toFixed(2)}`).join('\n'));
+  container.innerHTML = sorted.map(([name, qty]) => {
+    const pct = total > 0 ? (qty/total*100).toFixed(1) : 0;
+    return `<div class="pareto-item">
+      <div class="pareto-header">
+        <span class="pareto-name">${name}</span>
+        <span class="pareto-pct">${pct}% <span style="color:var(--muted);font-size:10px">(${qty}pçs)</span></span>
+      </div>
+      <div class="pareto-bar-bg">
+        <div class="pareto-bar-fill" style="width:${pct}%"></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-// =============================================================================
-// atualizarMinutos
-// =============================================================================
-function atualizarMinutos() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let wsRaw = ss.getSheetByName(SHEET_SAP_RAW);
-  if (!wsRaw) {
-    wsRaw = ss.insertSheet(SHEET_SAP_RAW);
-    wsRaw.getRange('A1:K1').setValues([['ClasseCusto','Denominação','Valor/MR','QtdMIN','UnMed','F','G','H','I','J','Data']]);
-    SpreadsheetApp.getUi().alert('Aba SAP_RAW criada!\nCole a exportação do SAP a partir da linha 2 e execute novamente.');
+// ── TEMPO SEPARAÇÃO ──────────────────────────────────────────────────────────
+function renderTempoSeparacao(filtered) {
+  // Usa campo tempoSep do JSON se disponível
+  const tempos = filtered.filter(d => d.tempoSep && d.tempoSep.media > 0).map(d => d.tempoSep);
+
+  if (!tempos.length) {
+    document.getElementById('tempo-medio').textContent = '—';
+    document.getElementById('tempo-min').textContent = '—';
+    document.getElementById('tempo-max').textContent = '—';
+    document.getElementById('tempo-total').textContent = '—';
     return;
   }
-  const data = wsRaw.getDataRange().getValues();
-  if (data.length <= 1) { SpreadsheetApp.getUi().alert('SAP_RAW está vazia!'); return; }
 
-  let totalMin = 0;
-  let mesIdx   = -1;
+  const media = tempos.reduce((a,t)=>a+t.media,0)/tempos.length;
+  const minVal = Math.min(...tempos.map(t=>t.min));
+  const maxVal = Math.max(...tempos.map(t=>t.max));
+  const totalReqs = tempos.reduce((a,t)=>a+(t.total||0),0);
 
-  for (let i = data.length - 1; i >= 1; i--) {
-    if (totalMin === 0 && data[i][3] && !String(data[i][0]).includes('Ordem')) {
-      const valStr = String(data[i][3]).replace(/\./g,'').replace(',','.').trim();
-      totalMin = Number(valStr) || 0;
-    }
-    if (mesIdx === -1 && data[i][10]) {
-      const date = new Date(data[i][10]);
-      if (!isNaN(date.getTime()) && date.getFullYear() === 2026) mesIdx = date.getMonth();
-    }
-    if (totalMin > 0 && mesIdx !== -1) break;
+  const fmtH = v => v < 1 ? `${Math.round(v*60)}min` : `${v.toFixed(1)}h`;
+
+  document.getElementById('tempo-medio').textContent = fmtH(media);
+  document.getElementById('tempo-min').textContent = fmtH(minVal);
+  document.getElementById('tempo-max').textContent = fmtH(maxVal);
+  document.getElementById('tempo-total').textContent = totalReqs;
+}
+
+// ── CHARTS ───────────────────────────────────────────────────────────────────
+const CD = {
+  responsive: true, maintainAspectRatio: false, animation: false,
+  plugins: { legend:{display:false}, tooltip:{backgroundColor:'#1e2330',titleColor:'#f5a623',bodyColor:'#e8ecf4',borderColor:'#f5a623',borderWidth:1}},
+  scales: {
+    x:{grid:{color:'#1e2330'},ticks:{color:'#6b7590',font:{family:'Barlow Condensed',size:11}}},
+    y:{grid:{color:'#1e2330'},ticks:{color:'#6b7590',font:{family:'Barlow Condensed',size:11}}}
   }
+};
 
-  if (mesIdx === -1) { SpreadsheetApp.getUi().alert('Datas não encontradas na coluna K.'); return; }
 
-  const minReal = new Array(12).fill(0);
-  minReal[mesIdx] = totalMin;
-  atualizarDashboard('minutos', minReal);
-  SpreadsheetApp.getUi().alert(`✅ Minutos atualizados!\n\n${MESES[mesIdx]}: ${totalMin.toLocaleString()} min`);
+// Destrói e recria canvas para evitar escala crescente
+function freshCtx(id) {
+  if (charts[id]) { charts[id].destroy(); charts[id] = null; }
+  const old = document.getElementById(id);
+  const h = old.getAttribute('height') || 130;
+  const parent = old.parentNode;
+  const neo = document.createElement('canvas');
+  neo.id = id; neo.setAttribute('height', h);
+  parent.replaceChild(neo, old);
+  return neo.getContext('2d');
 }
 
-// =============================================================================
-// atualizarBOMdoRequisicoes
-// =============================================================================
-function atualizarBOMdoRequisicoes() {
-  const ssReq = SpreadsheetApp.openById(ID_REQUISICOES);
-  const wsReq = ssReq.getSheetByName(ABA_REQUISICOES);
-  if (!wsReq) { SpreadsheetApp.getUi().alert('Aba Requisicoes não encontrada.'); return; }
-
-  const data      = wsReq.getDataRange().getValues();
-  const header    = data[0].map(h => String(h).toLowerCase().trim());
-  const colData   = header.indexOf('data');
-  const colMotivo = header.indexOf('motivo');
-  if (colData === -1 || colMotivo === -1) { SpreadsheetApp.getUi().alert('Colunas não encontradas.'); return; }
-
-  const bomErros = new Array(12).fill(0);
-  let total = 0;
-
-  for (let i = 1; i < data.length; i++) {
-    const motivo  = String(data[i][colMotivo]).toLowerCase().trim();
-    const dateVal = data[i][colData];
-    if (!motivo.includes('bom') || !dateVal) continue;
-    let date;
-    try { date = new Date(dateVal); if (isNaN(date.getTime())) continue; } catch(e) { continue; }
-    if (date.getFullYear() !== 2026) continue;
-    bomErros[date.getMonth()]++;
-    total++;
-  }
-
-  atualizarDashboard('bom', bomErros);
-  const resumo = total === 0 ? 'Nenhum BOM Errada encontrado.'
-    : MESES.map((m,i) => bomErros[i]>0 ? `${m}: ${bomErros[i]} erros` : null).filter(Boolean).join('\n');
-  SpreadsheetApp.getUi().alert(`✅ BOM atualizado!\n\nTotal: ${total} ocorrências\n\n${resumo}`);
+function drawScrapUnitChart(labels, data, meta) {
+  const ctx = freshCtx('chart-scrap-unit');
+  const unitData = data.map(d => d.scrapQty>0 ? parseFloat((d.scrapCost/d.scrapQty).toFixed(2)) : null);
+  charts['chart-scrap-unit'] = new Chart(ctx, { type:'line', data:{ labels, datasets:[
+    { data:unitData, borderColor:'#e74c3c', backgroundColor:'rgba(231,76,60,.08)', fill:true, tension:.3,
+      pointBackgroundColor:unitData.map(v=>v!==null&&v>meta?'#e74c3c':'#f5a623'), pointRadius:4 },
+    { data:data.map(()=>meta), borderColor:'rgba(245,166,35,.4)', borderDash:[4,4], borderWidth:1, pointRadius:0, fill:false }
+  ]}, options:CD });
 }
 
-// =============================================================================
-// atualizarMinPlan — proporcional aos dias úteis
-// =============================================================================
-function atualizarMinPlan() {
-  const ui     = SpreadsheetApp.getUi();
-  const ss     = SpreadsheetApp.getActiveSpreadsheet();
-  const wsDash = ss.getSheetByName(SHEET_DASHBOARD);
-
-  const resp = ui.prompt('Minutos Planejados',
-    'Digite: mês, minutos planejados, dias úteis do mês\nEx: 5,70896,21',
-    ui.ButtonSet.OK_CANCEL);
-  if (resp.getSelectedButton() !== ui.Button.OK) return;
-
-  const input = resp.getResponseText().split(',');
-  if (input.length !== 3) { ui.alert('Formato inválido. Ex: 5,70896,21'); return; }
-
-  const mesNum    = parseInt(input[0].trim()) - 1;
-  const minTotal  = parseFloat(input[1].trim());
-  const diasUteis = parseInt(input[2].trim());
-  if (mesNum < 0 || mesNum > 11 || isNaN(minTotal) || isNaN(diasUteis)) { ui.alert('Valores inválidos.'); return; }
-
-  const hoje     = new Date();
-  const ultimoDia = mesNum === hoje.getMonth()
-    ? hoje.getDate()
-    : new Date(hoje.getFullYear(), mesNum+1, 0).getDate();
-
-  let diasDecorridos = 0;
-  for (let d = 1; d <= ultimoDia; d++) {
-    const dw = new Date(hoje.getFullYear(), mesNum, d).getDay();
-    if (dw !== 0 && dw !== 6) diasDecorridos++;
-  }
-
-  const minProporcional = Math.round(minTotal * diasDecorridos / diasUteis);
-  const data    = wsDash.getDataRange().getValues();
-  const mesRows = encontrarLinhasMeses(data);
-  const rowIdx  = mesRows[mesNum];
-
-  if (rowIdx !== -1) {
-    wsDash.getRange(rowIdx+1, 5).setValue(minProporcional);
-    const nd = wsDash.getDataRange().getValues();
-    recalcularEficiencia(wsDash, nd, encontrarLinhasMeses(nd));
-  }
-
-  ui.alert(`✅ Min Planejados atualizados!\n\n${MESES[mesNum]}: ${minTotal.toLocaleString()} min\nDias úteis: ${diasUteis} | Decorridos: ${diasDecorridos}\nMeta proporcional: ${minProporcional.toLocaleString()} min`);
+function drawScrapChart(labels, data, meta) {
+  const ctx = freshCtx('chart-scrap');
+  charts['chart-scrap'] = new Chart(ctx, { type:'bar', data:{ labels, datasets:[
+    { data:data.map(d=>d.scrapCost),
+      backgroundColor:data.map(d=>d.scrapCost>meta?'rgba(231,76,60,.7)':'rgba(245,166,35,.6)'),
+      borderColor:data.map(d=>d.scrapCost>meta?'#e74c3c':'#f5a623'), borderWidth:1 }
+  ]}, options:CD });
 }
 
-// =============================================================================
-// atualizarTudo
-// =============================================================================
-function atualizarTudo() {
-  atualizarScrap();
-  atualizarMinutos();
-  atualizarBOMdoRequisicoes();
-  SpreadsheetApp.getUi().alert('✅ Dashboard atualizado completamente!');
+function drawBomChart(labels, data) {
+  const ctx = freshCtx('chart-bom');
+  charts['chart-bom'] = new Chart(ctx, { type:'bar', data:{ labels, datasets:[
+    { data:data.map(d=>d.bomErros),
+      backgroundColor:data.map(d=>d.bomErros>0?'rgba(52,152,219,.7)':'rgba(52,152,219,.2)'),
+      borderColor:'#3498db', borderWidth:1, borderRadius:2 }
+  ]}, options:CD });
 }
 
-// =============================================================================
-// FUNÇÕES AUXILIARES
-// =============================================================================
-function atualizarDashboard(tipo, arr1, arr2) {
-  const ss      = SpreadsheetApp.getActiveSpreadsheet();
-  const wsDash  = ss.getSheetByName(SHEET_DASHBOARD);
-  const data    = wsDash.getDataRange().getValues();
-  const mesRows = encontrarLinhasMeses(data);
-  for (let i = 0; i < 12; i++) {
-    const ri = mesRows[i];
-    if (ri === -1) continue;
-    if (tipo === 'scrap') {
-      wsDash.getRange(ri+1, 2).setValue(arr1[i]);
-      wsDash.getRange(ri+1, 3).setValue(arr2[i]);
-    } else if (tipo === 'minutos') {
-      wsDash.getRange(ri+1, 6).setValue(arr1[i]);
-    } else if (tipo === 'bom') {
-      wsDash.getRange(ri+1, 4).setValue(arr1[i]);
-    }
-  }
-  const nd = wsDash.getDataRange().getValues();
-  recalcularEficiencia(wsDash, nd, encontrarLinhasMeses(nd));
+function drawEficChart(labels, data, meta) {
+  const ctx = freshCtx('chart-efic');
+  const eficData = data.map(d => {
+    if (d.minPlan>0&&d.minReal>0) return parseFloat((d.minReal/d.minPlan*100).toFixed(2));
+    if (d.efic>0) return d.efic;
+    return null;
+  });
+  charts['chart-efic'] = new Chart(ctx, { type:'line', data:{ labels, datasets:[
+    { data:eficData, borderColor:'#2ecc71', backgroundColor:'rgba(46,204,113,.08)', fill:true, tension:.3,
+      pointBackgroundColor:eficData.map(v=>v!==null&&v<meta?'#e74c3c':'#2ecc71'), pointRadius:4 },
+    { data:data.map(()=>meta), borderColor:'rgba(245,166,35,.4)', borderDash:[4,4], borderWidth:1, pointRadius:0, fill:false }
+  ]}, options:CD });
 }
 
-function encontrarLinhasMeses(data) {
-  const ml = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-  const r  = new Array(12).fill(-1);
-  for (let i = 0; i < data.length; i++) {
-    const cell = String(data[i][0]).toLowerCase().trim();
-    for (let m = 0; m < 12; m++) {
-      if (cell.includes(ml[m])) { r[m] = i; break; }
-    }
-  }
-  return r;
+// ── STATUS ────────────────────────────────────────────────────────────────────
+function setStatus(text, type) {
+  document.getElementById('status-text').textContent = text;
+  const dot = document.getElementById('status-dot');
+  const colors = {ok:'var(--green)',bad:'var(--red)',warn:'var(--yellow)'};
+  dot.style.background = colors[type];
+  dot.style.boxShadow  = `0 0 8px ${colors[type]}`;
 }
 
-function recalcularEficiencia(wsDash, data, mesRows) {
-  for (let i = 0; i < 12; i++) {
-    const ri = mesRows[i];
-    if (ri === -1) continue;
-    const mp = Number(data[ri][4]) || 0;
-    const mr = Number(data[ri][5]) || 0;
-    wsDash.getRange(ri+1, 7).setValue(mp > 0 ? mr/mp : 0);
-  }
-}
-
-// =============================================================================
-// onOpen — menu
-// =============================================================================
-function onOpen() {
-  SpreadsheetApp.getUi()
-    .createMenu('🔄 BRILIA Dashboard')
-    .addItem('📦 Atualizar Scrap',           'atualizarScrap')
-    .addItem('⏱ Atualizar Minutos',          'atualizarMinutos')
-    .addItem('📋 BOM do Sistema de Desvios',  'atualizarBOMdoRequisicoes')
-    .addItem('📅 Definir Min Planejados',     'atualizarMinPlan')
-    .addSeparator()
-    .addItem('🔄 Atualizar Tudo',             'atualizarTudo')
-    .addToUi();
-}
+// ── INIT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('brilia_sheets_url');
+  if (saved) document.getElementById('sheets-url').value = saved;
+  loadData();
+});
+document.getElementById('mes-inicio').addEventListener('change', renderAll);
+document.getElementById('mes-fim').addEventListener('change', renderAll);
+</script>
+</body>
+</html>
