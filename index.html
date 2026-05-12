@@ -83,7 +83,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-se
 .kpi-meta { position: absolute; bottom: 12px; right: 14px; font-size: 10px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; }
 
 /* CHART CARD */
-.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; }
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; overflow: hidden; }
 .chart-title { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
 .chart-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 canvas { display: block; }
@@ -204,7 +204,7 @@ canvas { display: block; }
       </div>
       <div class="chart-card">
         <div class="chart-title">Custo Unitário / Mês</div>
-        <canvas id="chart-scrap-unit" height="130"></canvas>
+        <canvas id="chart-scrap-unit" height="130" style="height:130px"></canvas>
       </div>
     </div>
 
@@ -219,7 +219,7 @@ canvas { display: block; }
       </div>
       <div class="chart-card">
         <div class="chart-title">Scrap Custo / Mês</div>
-        <canvas id="chart-scrap" height="130"></canvas>
+        <canvas id="chart-scrap" height="130" style="height:130px"></canvas>
       </div>
     </div>
 
@@ -234,7 +234,7 @@ canvas { display: block; }
       </div>
       <div class="chart-card">
         <div class="chart-title">Erros de BOM / Mês</div>
-        <canvas id="chart-bom" height="130"></canvas>
+        <canvas id="chart-bom" height="130" style="height:130px"></canvas>
       </div>
     </div>
 
@@ -249,7 +249,7 @@ canvas { display: block; }
       </div>
       <div class="chart-card">
         <div class="chart-title">Eficiência % / Mês</div>
-        <canvas id="chart-efic" height="130"></canvas>
+        <canvas id="chart-efic" height="130" style="height:130px"></canvas>
       </div>
     </div>
 
@@ -556,7 +556,7 @@ function renderTempoSeparacao(filtered) {
 
 // ── CHARTS ───────────────────────────────────────────────────────────────────
 const CD = {
-  responsive: true, maintainAspectRatio: false, animation: false,
+  responsive: false, maintainAspectRatio: false, animation: false,
   plugins: { legend:{display:false}, tooltip:{backgroundColor:'#1e2330',titleColor:'#f5a623',bodyColor:'#e8ecf4',borderColor:'#f5a623',borderWidth:1}},
   scales: {
     x:{grid:{color:'#1e2330'},ticks:{color:'#6b7590',font:{family:'Barlow Condensed',size:11}}},
@@ -569,10 +569,14 @@ const CD = {
 function freshCtx(id) {
   if (charts[id]) { charts[id].destroy(); charts[id] = null; }
   const old = document.getElementById(id);
-  const h = old.getAttribute('height') || 130;
   const parent = old.parentNode;
+  const w = parent.offsetWidth || 300;
   const neo = document.createElement('canvas');
-  neo.id = id; neo.setAttribute('height', h);
+  neo.id = id;
+  neo.width  = w;
+  neo.height = 130;
+  neo.style.width  = w + 'px';
+  neo.style.height = '130px';
   parent.replaceChild(neo, old);
   return neo.getContext('2d');
 }
