@@ -58,7 +58,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-se
 .main { padding: 10px 16px; display: flex; flex-direction: column; gap: 10px; }
 
 /* KPI GRID */
-.kpi-col-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.kpi-col-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
 .kpi-col { display: flex; flex-direction: column; gap: 8px; }
 
 /* KPI CARD */
@@ -89,7 +89,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-se
 canvas { display: block; }
 
 /* SECOND ROW: Pareto + Tempo Separação + PSP */
-.secondary-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.secondary-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
 
 /* PARETO */
 .pareto-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 10px 14px; }
@@ -311,22 +311,26 @@ canvas { display: block; }
   </div>
 
   <!-- METAS -->
-  <div class="metas-row">
+  <div class="metas-row" style="grid-template-columns: repeat(5, minmax(0,1fr));">
     <div class="meta-block">
       <span class="meta-label">Meta C. Unit. R$</span>
-      <input type="number" class="meta-input" id="meta-scrap-qty" value="10" onchange="renderAll()">
+      <input type="number" class="meta-input" id="meta-scrap-qty" value="10" onchange="updateMetas()">
     </div>
     <div class="meta-block">
       <span class="meta-label">Meta Scrap R$</span>
-      <input type="number" class="meta-input" id="meta-scrap-cost" value="1000" onchange="renderAll()">
+      <input type="number" class="meta-input" id="meta-scrap-cost" value="1000" onchange="updateMetas()">
     </div>
     <div class="meta-block">
       <span class="meta-label">Meta BOM Erros</span>
-      <input type="number" class="meta-input" id="meta-bom" value="0" onchange="renderAll()">
+      <input type="number" class="meta-input" id="meta-bom" value="0" onchange="updateMetas()">
     </div>
     <div class="meta-block">
       <span class="meta-label">Meta Efic. %</span>
-      <input type="number" class="meta-input" id="meta-efic" value="95" onchange="renderAll()">
+      <input type="number" class="meta-input" id="meta-efic" value="95" onchange="updateMetas()">
+    </div>
+    <div class="meta-block">
+      <span class="meta-label">Meta Sep. (h)</span>
+      <input type="number" class="meta-input" id="meta-tempo" value="4" onchange="updateMetas()">
     </div>
   </div>
 
@@ -408,6 +412,72 @@ async function loadData() {
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
+function updateMetas() {
+  // Salva metas sem recriar gráficos
+  const mUnit = parseFloat(document.getElementById('meta-scrap-qty').value) || 10;
+  const mCost = parseFloat(document.getElementById('meta-scrap-cost').value) || 1000;
+  const mBom  = parseFloat(document.getElementById('meta-bom').value) || 0;
+  const mEfic = parseFloat(document.getElementById('meta-efic').value) || 95;
+  const mTempo = parseFloat(document.getElementById('meta-tempo').value) || 4;
+
+  // Salva no localStorage
+  localStorage.setItem('brilia_meta_unit', mUnit);
+  localStorage.setItem('brilia_meta_cost', mCost);
+  localStorage.setItem('brilia_meta_bom', mBom);
+  localStorage.setItem('brilia_meta_efic', mEfic);
+  localStorage.setItem('brilia_meta_tempo', mTempo);
+
+  // Só atualiza KPIs sem recriar gráficos
+  if (rawData) renderKPIsOnly();
+}
+
+function renderKPIsOnly() {
+  if (!rawData) return;
+  const ini = parseInt(document.getElementById('mes-inicio').value);
+  const fim = parseInt(document.getElementById('mes-fim').value);
+  const filtered = rawData.filter((_,i) => i >= ini && i <= fim);
+
+  const totQty  = filtered.reduce((a,d)=>a+d.scrapQty, 0);
+  const totCost = filtered.reduce((a,d)=>a+d.scrapCost, 0);
+  const totBom  = filtered.reduce((a,d)=>a+d.bomErros, 0);
+  const custoUnit = totQty > 0 ? totCost / totQty : 0;
+  const eficArr = filtered.map(d => {
+    if (d.minPlan>0&&d.minReal>0) return d.minReal/d.minPlan*100;
+    if (d.efic>0) return d.efic;
+    return null;
+  }).filter(v=>v!==null);
+  const avgEfic = eficArr.length ? eficArr.reduce((a,v)=>a+v,0)/eficArr.length : 0;
+
+  const mUnit  = parseFloat(document.getElementById('meta-scrap-qty').value) || 10;
+  const mCost  = parseFloat(document.getElementById('meta-scrap-cost').value) || 1000;
+  const mBom   = parseFloat(document.getElementById('meta-bom').value) || 0;
+  const mEfic  = parseFloat(document.getElementById('meta-efic').value) || 95;
+  const mTempo = parseFloat(document.getElementById('meta-tempo').value) || 4;
+
+  setKPI('scrap-unit',
+    `<sup>R$</sup>${custoUnit.toFixed(2)}<span style="font-size:14px;color:var(--muted)">/un</span>`,
+    custoUnit>mUnit?'bad':custoUnit===0?'warn':'ok',
+    custoUnit===0?'— Sem dados':custoUnit>mUnit?'⚠ Acima da meta':'✓ Dentro da meta',
+    `R$${mUnit.toFixed(2)}/un`);
+  setKPI('scrap-cost',
+    `<sup>R$</sup>${totCost.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}`,
+    totCost>mCost?'bad':'ok',
+    totCost>mCost?'⚠ Acima da meta':'✓ Dentro da meta',`R$${fmt(mCost)}`);
+  setKPI('bom', totBom,
+    totBom>mBom?'bad':'ok',
+    totBom>mBom?`⚠ ${totBom} erros encontrados`:'✓ Dentro da meta', mBom);
+  setKPI('efic',
+    `${avgEfic.toFixed(1)}<sup>%</sup>`,
+    avgEfic<mEfic&&avgEfic>0?'bad':avgEfic===0?'warn':'ok',
+    avgEfic===0?'— Sem dados':avgEfic<mEfic?`⚠ ${avgEfic.toFixed(1)}% — abaixo da meta`:`✓ ${avgEfic.toFixed(1)}% — na meta`,
+    mEfic+'%');
+
+  // Atualiza meta tempo separação
+  const tmEl = document.getElementById('tempo-meta-val');
+  if (tmEl) tmEl.textContent = mTempo+'h';
+  document.getElementById('m-efic').textContent = mEfic+'%';
+}
+
 function renderAll() {
   if (!rawData) return;
   const ini = parseInt(document.getElementById('mes-inicio').value);
@@ -636,6 +706,19 @@ function setStatus(text, type) {
 window.addEventListener('load', () => {
   const saved = localStorage.getItem('brilia_sheets_url');
   if (saved) document.getElementById('sheets-url').value = saved;
+  // Load saved metas
+  const savedMetas = {
+    'meta-scrap-qty': 'brilia_meta_unit',
+    'meta-scrap-cost': 'brilia_meta_cost',
+    'meta-bom': 'brilia_meta_bom',
+    'meta-efic': 'brilia_meta_efic',
+    'meta-tempo': 'brilia_meta_tempo',
+  };
+  Object.entries(savedMetas).forEach(([id, key]) => {
+    const v = localStorage.getItem(key);
+    const el = document.getElementById(id);
+    if (v && el) el.value = v;
+  });
   loadData();
 });
 document.getElementById('mes-inicio').addEventListener('change', renderAll);
