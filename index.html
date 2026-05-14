@@ -165,7 +165,7 @@ canvas { display: block; }
   <!-- ROW 1: KPIs + Charts -->
   <div class="kpi-col-grid">
 
-    <!-- COL 1: Custo Unitário -->
+    <!-- COL 1: Custo Unitário + Pareto Quantidade -->
     <div class="kpi-col">
       <div class="kpi-card c-red">
         <div class="kpi-icon">📊</div>
@@ -175,8 +175,10 @@ canvas { display: block; }
         <div class="kpi-meta">META: <span id="m-scrap-unit">—</span></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">Custo Unitário / Mês</div>
-        <canvas id="chart-scrap-unit" height="100" style="height:100px"></canvas>
+        <div class="chart-title">Top Defeitos — Quantidade</div>
+        <div id="pareto-qtd-container" style="padding:2px 0;">
+          <div style="color:var(--muted);font-size:11px;">Carregando...</div>
+        </div>
       </div>
     </div>
 
@@ -481,7 +483,7 @@ function renderAll() {
     mEfic + '%');
 
   // Charts
-  drawScrapUnitChart(labels, filtered);
+  renderParetoQtd(filtered);
   drawScrapChart(labels, filtered, mCost);
   drawBomChart(labels, filtered);
   drawEficChart(labels, filtered, mEfic);
@@ -616,9 +618,9 @@ async function loadDRL() {
         const pct = b.drl!==null ? Math.max((b.drl/maxDrl*100),5) : 5;
         const cor = drlColor(b.drl);
         return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">
-          <span style="font-size:8px;font-weight:${b.isToday?700:400};color:${cor};font-family:'Barlow Condensed',sans-serif">${b.drl!==null?b.drl.toFixed(1)+'%':'—'}</span>
+          <span style="font-size:10px;font-weight:${b.isToday?700:400};color:${cor};font-family:'Barlow Condensed',sans-serif">${b.drl!==null?b.drl.toFixed(1)+'%':'—'}</span>
           <div style="width:100%;border-radius:2px 2px 0 0;background:${cor};opacity:${b.isToday?1:0.6};height:${pct}%;min-height:3px;transition:height .4s"></div>
-          <span style="font-size:8px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:${b.isToday?700:400}">${b.label}${b.isToday?' ◀':''}</span>
+          <span style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:${b.isToday?700:400}">${b.label}${b.isToday?' ◀':''}</span>
         </div>`;
       }).join('')}
     </div>`;
@@ -678,11 +680,49 @@ function renderSemanasReq(filtered) {
     .map(([sem, qty]) => {
       const pct = Math.max((qty/maxVal*100), 5);
       return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-        <span style="font-size:9px;color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-weight:600">${qty}</span>
+        <span style="font-size:11px;color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-weight:600">${qty}</span>
         <div style="width:100%;border-radius:2px 2px 0 0;background:var(--teal);opacity:.8;height:${pct}%;min-height:4px"></div>
-        <span style="font-size:8px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">${sem}</span>
+        <span style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">${sem}</span>
       </div>`;
     }).join('');
+}
+
+// ── PARETO QUANTIDADE (col 1, substitui gráfico custo unitário) ───────────────
+function renderParetoQtd(filtered) {
+  const container = document.getElementById('pareto-qtd-container');
+  if (!container) return;
+
+  const allQtd = {};
+  filtered.forEach(d => {
+    if (d.pareto && typeof d.pareto === 'object') {
+      Object.entries(d.pareto).forEach(([k, v]) => {
+        allQtd[k] = (allQtd[k] || 0) + v;
+      });
+    }
+  });
+
+  if (!Object.keys(allQtd).length) {
+    container.innerHTML = `<div style="color:var(--muted);font-size:10px;line-height:1.8">
+      Disponível após atualização<br>do Apps Script.
+    </div>`;
+    return;
+  }
+
+  const total  = Object.values(allQtd).reduce((a,v)=>a+v, 0);
+  const sorted = Object.entries(allQtd).sort((a,b)=>b[1]-a[1]).slice(0, 5);
+
+  container.innerHTML = sorted.map(([nome, qty]) => {
+    const pct = total > 0 ? (qty/total*100) : 0;
+    return `<div style="margin-bottom:7px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+        <span style="font-size:10px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:65%">${nome}</span>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--accent);font-weight:600">${pct.toFixed(1)}% <span style="color:var(--muted);font-size:9px">(${qty}pç)</span></span>
+      </div>
+      <div style="background:var(--border);border-radius:2px;height:3px;">
+        <div style="height:3px;border-radius:2px;width:${pct.toFixed(1)}%;background:linear-gradient(90deg,var(--red),var(--accent));transition:width .5s"></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ── CHARTS ────────────────────────────────────────────────────────────────────
