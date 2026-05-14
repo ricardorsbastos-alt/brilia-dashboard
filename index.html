@@ -48,11 +48,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-se
 
 /* CONFIG BAR */
 .config-bar { display: none; }
-.config-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
-.config-input { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 4px 10px; font-size: 11px; border-radius: 3px; outline: none; }
-.config-input:focus { border-color: var(--accent); color: var(--text); }
-.config-apply { background: var(--accent); color: #000; border: none; padding: 5px 14px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; font-weight: 700; cursor: pointer; border-radius: 3px; }
-.config-apply:hover { opacity: .85; }
 
 /* MAIN */
 .main { padding: 4px 8px; display: flex; flex-direction: column; gap: 5px; }
@@ -88,7 +83,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-se
 .chart-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 canvas { display: block; }
 
-/* SECOND ROW: Pareto + Tempo Separação + PSP */
+/* SECOND ROW */
 .secondary-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; }
 
 /* PARETO */
@@ -107,20 +102,6 @@ canvas { display: block; }
 .tempo-title { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
 .tempo-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 .tempo-big { font-family: 'Barlow Condensed', sans-serif; font-size: 36px; font-weight: 700; color: var(--teal); line-height: 1; }
-.tempo-unit { font-size: 12px; color: var(--muted); margin-top: 4px; }
-.tempo-sub { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.tempo-sub-item { background: var(--surface2); border-radius: 3px; padding: 8px 10px; }
-.tempo-sub-label { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
-.tempo-sub-val { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 600; color: var(--text); }
-
-/* PSP */
-.psp-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 10px 14px; border-left: 3px solid var(--purple); }
-.psp-title { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; }
-.psp-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(155,89,182,.15); border: 1px solid rgba(155,89,182,.3); border-radius: 3px; padding: 6px 12px; margin-bottom: 12px; }
-.psp-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--purple); animation: pulse 2s infinite; }
-.psp-badge-text { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 2px; color: var(--purple); text-transform: uppercase; }
-.psp-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
-.psp-desc strong { color: var(--text); }
 
 /* METAS */
 .metas-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
@@ -176,15 +157,6 @@ canvas { display: block; }
     </select>
     <button class="refresh-btn" onclick="loadData()">↺ ATUALIZAR</button>
   </div>
-</div>
-
-<!-- CONFIG BAR -->
-<div class="config-bar">
-  <span class="config-label">⬦ Google Sheets URL</span>
-  <input type="text" class="config-input" id="sheets-url"
-    value="https://script.google.com/macros/s/AKfycby1DqOThSoS9fBW9j5ffDl_YWHa6BvcaTWI0He3UED2WL21ibpulbOgrd9nOP8W8Y4B/exec"
-    placeholder="Cole aqui a URL do Apps Script...">
-  <button class="config-apply" onclick="saveAndLoad()">APLICAR</button>
 </div>
 
 <!-- MAIN -->
@@ -266,7 +238,7 @@ canvas { display: block; }
       </div>
     </div>
 
-    <!-- TEMPO DE SEPARAÇÃO + GRÁFICO SEMANAL -->
+    <!-- TEMPO DE SEPARAÇÃO -->
     <div class="tempo-card">
       <div class="tempo-title">⏱ Tempo Médio de Separação — Almox</div>
       <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px;">
@@ -298,7 +270,7 @@ canvas { display: block; }
   </div>
 
   <!-- METAS -->
-  <div class="metas-row" style="grid-template-columns: repeat(4, minmax(0,1fr));">
+  <div class="metas-row" style="grid-template-columns: repeat(3, minmax(0,1fr));">
     <div class="meta-block">
       <span class="meta-label">Meta Scrap R$</span>
       <input type="number" class="meta-input" id="meta-scrap-cost" value="1000" onchange="updateMetas()">
@@ -310,10 +282,6 @@ canvas { display: block; }
     <div class="meta-block">
       <span class="meta-label">Meta Efic. %</span>
       <input type="number" class="meta-input" id="meta-efic" value="95" onchange="updateMetas()">
-    </div>
-    <div class="meta-block">
-      <span class="meta-label">Meta Sep. (h)</span>
-      <input type="number" class="meta-input" id="meta-tempo" value="4" onchange="updateMetas()">
     </div>
   </div>
 
@@ -334,15 +302,23 @@ let rawData = null;
 let countdown = REFRESH_INTERVAL;
 
 const DEMO_DATA = [
-  { mes:'Jan', scrapQty:204, scrapCost:1672.69, bomErros:0, minPlan:0, minReal:0, efic:0 },
-  { mes:'Fev', scrapQty:61,  scrapCost:632.85,  bomErros:0, minPlan:0, minReal:0, efic:0 },
-  { mes:'Mar', scrapQty:182, scrapCost:3799.46, bomErros:0, minPlan:0, minReal:0, efic:0 },
-  { mes:'Abr', scrapQty:204, scrapCost:1623.89, bomErros:5, minPlan:70896, minReal:71620.74, efic:101.02 },
-  { mes:'Mai', scrapQty:0,   scrapCost:0,        bomErros:1, minPlan:23632, minReal:15539, efic:0 },
-  ...Array(7).fill(null).map((_,i)=>({mes:MESES[5+i],scrapQty:0,scrapCost:0,bomErros:0,minPlan:0,minReal:0,efic:0}))
+  { mes:'Jan', scrapQty:204, scrapCost:1672.69, bomErros:0, minPlan:0, minReal:0, efic:0,
+    paretoCusto:{'Falha na produção':820.50,'Queimado':510.30,'Deformidade':220.10,'Rigidez':121.79}, pareto:null, tempoSep:null },
+  { mes:'Fev', scrapQty:61,  scrapCost:632.85,  bomErros:0, minPlan:0, minReal:0, efic:0,
+    paretoCusto:{'Queimado':310.20,'Falha na produção':200.15,'Rigidez':122.50}, pareto:null, tempoSep:null },
+  { mes:'Mar', scrapQty:182, scrapCost:3799.46, bomErros:0, minPlan:0, minReal:0, efic:0,
+    paretoCusto:{'Falha na produção':1800.00,'Queimado':950.46,'Deformidade':700.00,'Rigidez':349.00}, pareto:null, tempoSep:null },
+  { mes:'Abr', scrapQty:204, scrapCost:1623.89, bomErros:5, minPlan:70896, minReal:71620.74, efic:101.02,
+    paretoCusto:{'Falha na produção':700.00,'Queimado':480.89,'Deformidade':280.00,'Rigidez':163.00}, pareto:null, tempoSep:null },
+  { mes:'Mai', scrapQty:0,   scrapCost:0,        bomErros:1, minPlan:23632, minReal:15539, efic:0,
+    paretoCusto:null, pareto:null, tempoSep:null },
+  ...Array(7).fill(null).map((_,i)=>({
+    mes:MESES[5+i], scrapQty:0, scrapCost:0, bomErros:0, minPlan:0, minReal:0, efic:0,
+    paretoCusto:null, pareto:null, tempoSep:null
+  }))
 ];
 
-// ── CLOCK ────────────────────────────────────────────────────────────────────
+// ── CLOCK ─────────────────────────────────────────────────────────────────────
 function updateClock() {
   document.getElementById('clock').textContent =
     new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
@@ -350,42 +326,36 @@ function updateClock() {
 setInterval(updateClock, 1000); updateClock();
 setInterval(()=>{ if(--countdown<=0){countdown=REFRESH_INTERVAL;loadData();} }, 1000);
 
-// ── SAVE & LOAD ───────────────────────────────────────────────────────────────
-function saveAndLoad() {
-  loadData();
-}
-
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycby1DqOThSoS9fBW9j5ffDl_YWHa6BvcaTWI0He3UED2WL21ibpulbOgrd9nOP8W8Y4B/exec';
 
+// ── LOAD DATA ─────────────────────────────────────────────────────────────────
+function saveAndLoad() { loadData(); }
+
 async function loadData() {
-  const url = SHEETS_URL;
-  if (url) {
-    setStatus('BUSCANDO...','warn');
-    try {
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error('Falha');
-      const json = await resp.json();
-      rawData = json.filter(d => MESES.some(m => String(d.mes).includes(m))).map(d => ({
-        mes: String(d.mes),
-        scrapQty:  parseFloat(d.scrapQty)  || 0,
-        scrapCost: parseFloat(d.scrapCost) || 0,
-        bomErros:  parseFloat(d.bomErros)  || 0,
-        minPlan:   parseFloat(d.minPlan)   || 0,
-        minReal:   parseFloat(d.minReal)   || 0,
-        efic:      parseFloat(d.efic)      || 0,
-        // Novos campos
-        pareto:    d.pareto   || null,
-        tempoSep:  d.tempoSep || null,
+  setStatus('BUSCANDO...','warn');
+  try {
+    const resp = await fetch(SHEETS_URL);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const json = await resp.json();
+    rawData = json
+      .filter(d => MESES.some(m => String(d.mes).includes(m)))
+      .map(d => ({
+        mes:         String(d.mes),
+        scrapQty:    parseFloat(d.scrapQty)  || 0,
+        scrapCost:   parseFloat(d.scrapCost) || 0,
+        bomErros:    parseFloat(d.bomErros)  || 0,
+        minPlan:     parseFloat(d.minPlan)   || 0,
+        minReal:     parseFloat(d.minReal)   || 0,
+        efic:        parseFloat(d.efic)      || 0,
+        pareto:      d.pareto      || null,
+        paretoCusto: d.paretoCusto || null,  // ← campo correto do GAS
+        tempoSep:    d.tempoSep    || null,
       }));
-      if (!rawData.length) throw new Error('Sem dados');
-      setStatus('ONLINE','ok');
-    } catch(e) {
-      rawData = DEMO_DATA;
-      setStatus('DEMO — '+e.message.substring(0,40),'warn');
-    }
-  } else {
+    if (!rawData.length) throw new Error('Sem dados');
+    setStatus('ONLINE','ok');
+  } catch(e) {
     rawData = DEMO_DATA;
-    setStatus('DEMO MODE','warn');
+    setStatus('DEMO — ' + e.message.substring(0,40), 'warn');
   }
   document.getElementById('last-update').textContent = new Date().toLocaleTimeString('pt-BR');
   countdown = REFRESH_INTERVAL;
@@ -393,36 +363,39 @@ async function loadData() {
   loadDRL();
 }
 
-// ── RENDER ────────────────────────────────────────────────────────────────────
+// ── METAS ─────────────────────────────────────────────────────────────────────
 function updateMetas() {
-  // Salva metas sem recriar gráficos
-  const mUnit = parseFloat(document.getElementById('meta-scrap-qty').value) || 10;
   const mCost = parseFloat(document.getElementById('meta-scrap-cost').value) || 1000;
-  const mBom  = parseFloat(document.getElementById('meta-bom').value) || 0;
-  const mEfic = parseFloat(document.getElementById('meta-efic').value) || 95;
-  const mTempo = parseFloat(document.getElementById('meta-tempo').value) || 4;
+  const mBom  = parseFloat(document.getElementById('meta-bom').value)        || 0;
+  const mEfic = parseFloat(document.getElementById('meta-efic').value)       || 95;
 
-  // Salva no localStorage
-  // meta unit removida
   localStorage.setItem('brilia_meta_cost', mCost);
-  localStorage.setItem('brilia_meta_bom', mBom);
+  localStorage.setItem('brilia_meta_bom',  mBom);
   localStorage.setItem('brilia_meta_efic', mEfic);
-  localStorage.setItem('brilia_meta_tempo', mTempo);
 
-  // Só atualiza KPIs sem recriar gráficos
   if (rawData) renderKPIsOnly();
 }
 
+function getMetas() {
+  return {
+    mCost: parseFloat(document.getElementById('meta-scrap-cost').value) || 1000,
+    mBom:  parseFloat(document.getElementById('meta-bom').value)        || 0,
+    mEfic: parseFloat(document.getElementById('meta-efic').value)       || 95,
+  };
+}
+
+// ── KPIs ONLY (sem recriar gráficos) ─────────────────────────────────────────
 function renderKPIsOnly() {
   if (!rawData) return;
   const ini = parseInt(document.getElementById('mes-inicio').value);
   const fim = parseInt(document.getElementById('mes-fim').value);
   const filtered = rawData.filter((_,i) => i >= ini && i <= fim);
 
-  const totQty  = filtered.reduce((a,d)=>a+d.scrapQty, 0);
-  const totCost = filtered.reduce((a,d)=>a+d.scrapCost, 0);
-  const totBom  = filtered.reduce((a,d)=>a+d.bomErros, 0);
+  const totQty    = filtered.reduce((a,d)=>a+d.scrapQty, 0);
+  const totCost   = filtered.reduce((a,d)=>a+d.scrapCost, 0);
+  const totBom    = filtered.reduce((a,d)=>a+d.bomErros, 0);
   const custoUnit = totQty > 0 ? totCost / totQty : 0;
+
   const eficArr = filtered.map(d => {
     if (d.minPlan>0&&d.minReal>0) return d.minReal/d.minPlan*100;
     if (d.efic>0) return d.efic;
@@ -430,36 +403,35 @@ function renderKPIsOnly() {
   }).filter(v=>v!==null);
   const avgEfic = eficArr.length ? eficArr.reduce((a,v)=>a+v,0)/eficArr.length : 0;
 
-  const mUnit  = 0; // removido custo unitário
-  const mCost  = parseFloat(document.getElementById('meta-scrap-cost').value) || 1000;
-  const mBom   = parseFloat(document.getElementById('meta-bom').value) || 0;
-  const mEfic  = parseFloat(document.getElementById('meta-efic').value) || 95;
-  const mTempo = parseFloat(document.getElementById('meta-tempo').value) || 4;
+  const { mCost, mBom, mEfic } = getMetas();
 
   setKPI('scrap-unit',
     `<sup>R$</sup>${custoUnit.toFixed(2)}<span style="font-size:14px;color:var(--muted)">/un</span>`,
-    custoUnit>mUnit?'bad':custoUnit===0?'warn':'ok',
-    custoUnit===0?'— Sem dados':custoUnit>mUnit?'⚠ Acima da meta':'✓ Dentro da meta',
-    `R$${mUnit.toFixed(2)}/un`);
+    custoUnit === 0 ? 'warn' : 'info',
+    custoUnit === 0 ? '— Sem dados' : `R$ ${custoUnit.toFixed(2)} por peça`,
+    '—');
+
   setKPI('scrap-cost',
     `<sup>R$</sup>${totCost.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}`,
-    totCost>mCost?'bad':'ok',
-    totCost>mCost?'⚠ Acima da meta':'✓ Dentro da meta',`R$${fmt(mCost)}`);
+    totCost > mCost ? 'bad' : 'ok',
+    totCost > mCost ? '⚠ Acima da meta' : '✓ Dentro da meta',
+    `R$${fmt(mCost)}`);
+
   setKPI('bom', totBom,
-    totBom>mBom?'bad':'ok',
-    totBom>mBom?`⚠ ${totBom} erros encontrados`:'✓ Dentro da meta', mBom);
+    totBom > mBom ? 'bad' : 'ok',
+    totBom > mBom ? `⚠ ${totBom} erros encontrados` : '✓ Dentro da meta',
+    mBom);
+
   setKPI('efic',
     `${avgEfic.toFixed(1)}<sup>%</sup>`,
-    avgEfic<mEfic&&avgEfic>0?'bad':avgEfic===0?'warn':'ok',
-    avgEfic===0?'— Sem dados':avgEfic<mEfic?`⚠ ${avgEfic.toFixed(1)}% — abaixo da meta`:`✓ ${avgEfic.toFixed(1)}% — na meta`,
-    mEfic+'%');
+    avgEfic < mEfic && avgEfic > 0 ? 'bad' : avgEfic === 0 ? 'warn' : 'ok',
+    avgEfic === 0 ? '— Sem dados' : avgEfic < mEfic ? `⚠ ${avgEfic.toFixed(1)}% — abaixo da meta` : `✓ ${avgEfic.toFixed(1)}% — na meta`,
+    mEfic + '%');
 
-  // Atualiza meta tempo separação
-  const tmEl = document.getElementById('tempo-meta-val');
-  if (tmEl) tmEl.textContent = mTempo+'h';
-  document.getElementById('m-efic').textContent = mEfic+'%';
+  document.getElementById('m-efic').textContent = mEfic + '%';
 }
 
+// ── RENDER ALL ────────────────────────────────────────────────────────────────
 function renderAll() {
   if (!rawData) return;
   const ini = parseInt(document.getElementById('mes-inicio').value);
@@ -467,9 +439,9 @@ function renderAll() {
   const filtered = rawData.filter((_,i) => i >= ini && i <= fim);
   const labels   = filtered.map(d => d.mes);
 
-  const totQty  = filtered.reduce((a,d)=>a+d.scrapQty, 0);
-  const totCost = filtered.reduce((a,d)=>a+d.scrapCost, 0);
-  const totBom  = filtered.reduce((a,d)=>a+d.bomErros, 0);
+  const totQty    = filtered.reduce((a,d)=>a+d.scrapQty, 0);
+  const totCost   = filtered.reduce((a,d)=>a+d.scrapCost, 0);
+  const totBom    = filtered.reduce((a,d)=>a+d.bomErros, 0);
   const custoUnit = totQty > 0 ? totCost / totQty : 0;
 
   const eficArr = filtered.map(d => {
@@ -479,10 +451,14 @@ function renderAll() {
   }).filter(v=>v!==null);
   const avgEfic = eficArr.length ? eficArr.reduce((a,v)=>a+v,0)/eficArr.length : 0;
 
-  const mUnit = parseFloat(document.getElementById('meta-scrap-qty').value) || 10;
-  const mCost = parseFloat(document.getElementById('meta-scrap-cost').value) || 1000;
-  const mBom  = parseFloat(document.getElementById('meta-bom').value) || 0;
-  const mEfic = parseFloat(document.getElementById('meta-efic').value) || 95;
+  const { mCost, mBom, mEfic } = getMetas();
+
+  // KPI 1: Custo Unitário (sem meta configurável — calculado)
+  setKPI('scrap-unit',
+    `<sup>R$</sup>${custoUnit.toFixed(2)}<span style="font-size:14px;color:var(--muted)">/un</span>`,
+    custoUnit === 0 ? 'warn' : 'info',
+    custoUnit === 0 ? '— Sem dados' : `R$ ${custoUnit.toFixed(2)} por peça`,
+    '—');
 
   // KPI 2: Custo Total
   setKPI('scrap-cost',
@@ -500,81 +476,87 @@ function renderAll() {
   // KPI 4: Eficiência
   setKPI('efic',
     `${avgEfic.toFixed(1)}<sup>%</sup>`,
-    avgEfic<mEfic&&avgEfic>0 ? 'bad' : avgEfic===0 ? 'warn' : 'ok',
-    avgEfic===0 ? '— Sem dados' : avgEfic<mEfic ? `⚠ ${avgEfic.toFixed(1)}% — abaixo da meta` : `✓ ${avgEfic.toFixed(1)}% — na meta`,
-    mEfic+'%');
+    avgEfic < mEfic && avgEfic > 0 ? 'bad' : avgEfic === 0 ? 'warn' : 'ok',
+    avgEfic === 0 ? '— Sem dados' : avgEfic < mEfic ? `⚠ ${avgEfic.toFixed(1)}% — abaixo da meta` : `✓ ${avgEfic.toFixed(1)}% — na meta`,
+    mEfic + '%');
 
   // Charts
-  drawScrapQtyChart(labels, filtered);
+  drawScrapUnitChart(labels, filtered);
   drawScrapChart(labels, filtered, mCost);
   drawBomChart(labels, filtered);
   drawEficChart(labels, filtered, mEfic);
 
-  // Pareto, Custo Pareto, Tempo Sep
-  renderParetoQtdMini(filtered);
+  // Pareto Financeiro e Tempo Separação
   renderParetoCusto(filtered);
   renderTempoSeparacao(filtered);
 }
 
-function fmt(v) { return v>=1000 ? (v/1000).toFixed(1)+'k' : v.toFixed(0); }
+function fmt(v) { return v >= 1000 ? (v/1000).toFixed(1)+'k' : v.toFixed(0); }
 
 function setKPI(id, htmlVal, status, statusText, meta) {
   document.getElementById('v-'+id).innerHTML = String(htmlVal);
   const s = document.getElementById('s-'+id);
-  s.className = 'kpi-status '+status;
+  s.className = 'kpi-status ' + status;
   s.innerHTML = `<span class="dot"></span> ${statusText}`;
   const m = document.getElementById('m-'+id);
   if (m) m.textContent = meta;
 }
 
-// ── PARETO ───────────────────────────────────────────────────────────────────
-function renderPareto(filtered) {
-  // Tenta usar campo pareto do JSON (calculado pelo Apps Script)
-  // Se não existir, usa dados agregados do período
-  const container = document.getElementById('pareto-container');
+// ── PARETO FINANCEIRO ─────────────────────────────────────────────────────────
+// FIX: usa container correto (pareto-custo-container) e campo paretoCusto do JSON
+function renderParetoCusto(filtered) {
+  const container = document.getElementById('pareto-custo-container');
+  if (!container) return;
 
-  // Agrupa pareto de todos os meses do período
-  const allPareto = {};
+  // Agrega paretoCusto de todos os meses do período
+  const allCusto = {};
   filtered.forEach(d => {
-    if (d.pareto && typeof d.pareto === 'object') {
-      Object.entries(d.pareto).forEach(([k,v]) => {
-        allPareto[k] = (allPareto[k]||0) + v;
+    if (d.paretoCusto && typeof d.paretoCusto === 'object') {
+      Object.entries(d.paretoCusto).forEach(([k, v]) => {
+        allCusto[k] = (allCusto[k] || 0) + v;
       });
     }
   });
 
-  const hasPareto = Object.keys(allPareto).length > 0;
+  const hasDados = Object.keys(allCusto).length > 0;
 
-  if (!hasPareto) {
+  if (!hasDados) {
     container.innerHTML = `<div style="color:var(--muted);font-size:11px;line-height:1.8">
-      Pareto será calculado automaticamente<br>quando o script for atualizado.<br><br>
-      <span style="color:var(--accent)">Top defeitos históricos (Abr):</span><br>
-      <span style="color:var(--text)">• Falha na produção</span><br>
-      <span style="color:var(--text)">• Queimado</span><br>
-      <span style="color:var(--text)">• Deformidade</span><br>
-      <span style="color:var(--text)">• Rigidez</span>
+      Pareto financeiro disponível após<br>atualização do Apps Script.<br><br>
+      <span style="color:var(--accent);font-size:10px">Execute "Atualizar Scrap" no menu<br>da planilha para popular os dados.</span>
     </div>`;
     return;
   }
 
-  const sorted = Object.entries(allPareto).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const total  = Object.values(allPareto).reduce((a,v)=>a+v,0);
+  const totalCusto = Object.values(allCusto).reduce((a,v)=>a+v, 0);
+  const sorted = Object.entries(allCusto).sort((a,b)=>b[1]-a[1]).slice(0, 6);
 
-  container.innerHTML = sorted.map(([name, qty]) => {
-    const pct = total > 0 ? (qty/total*100).toFixed(1) : 0;
+  container.innerHTML = sorted.map(([nome, custo]) => {
+    const pct = totalCusto > 0 ? (custo / totalCusto * 100) : 0;
+    const custoFmt = custo >= 1000
+      ? `R$${(custo/1000).toFixed(1)}k`
+      : `R$${custo.toFixed(2)}`;
     return `<div class="pareto-item">
       <div class="pareto-header">
-        <span class="pareto-name">${name}</span>
-        <span class="pareto-pct">${pct}% <span style="color:var(--muted);font-size:10px">(${qty}pçs)</span></span>
+        <span class="pareto-name">${nome}</span>
+        <span class="pareto-pct">${pct.toFixed(1)}% <span style="color:var(--muted);font-size:10px">(${custoFmt})</span></span>
       </div>
       <div class="pareto-bar-bg">
-        <div class="pareto-bar-fill" style="width:${pct}%"></div>
+        <div class="pareto-bar-fill" style="width:${pct.toFixed(1)}%"></div>
       </div>
     </div>`;
   }).join('');
+
+  // Rodapé com total
+  container.innerHTML += `<div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:10px;">
+    <span style="color:var(--muted)">TOTAL SCRAP</span>
+    <span style="color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-weight:600">
+      R$${totalCusto.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
+    </span>
+  </div>`;
 }
 
-// ── DRL ──────────────────────────────────────────────────────────────────────
+// ── DRL ───────────────────────────────────────────────────────────────────────
 async function loadDRL() {
   const container = document.getElementById('drl-container');
   if (!container) return;
@@ -582,16 +564,13 @@ async function loadDRL() {
   const URL_DESVIOS = 'https://script.google.com/macros/s/AKfycbznZqoCs3r5s3Lp6Vd7bfaNFak8oeYwHAKV6l4Uk9-7G-MwvdtyHQiOf46d02DcU-hiBw/exec';
 
   try {
-    // Busca desvios e producao em paralelo
     const [resD, resP] = await Promise.all([
       fetch(URL_DESVIOS + '?action=getDesvios'),
       fetch(URL_DESVIOS + '?action=getProducao')
     ]);
-
     const desvios   = await resD.json();
     const producoes = await resP.json();
 
-    // Últimos 7 dias
     const dias = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
@@ -600,57 +579,44 @@ async function loadDRL() {
     }
 
     const barras = dias.map(dt => {
-      // Produção do dia
       const prod = producoes
-        .filter(p => {
-          const pDate = p.Data || p.date || '';
-          return String(pDate).includes(dt) || String(pDate).startsWith(dt);
-        })
-        .reduce((s, p) => s + (Number(p.Quantidade || p.qty) || 0), 0);
-
-      // Desvios do dia
+        .filter(p => { const pd = p.Data||p.date||''; return String(pd).includes(dt)||String(pd).startsWith(dt); })
+        .reduce((s,p)=>s+(Number(p.Quantidade||p.qty)||0), 0);
       const desv = desvios
-        .filter(d => {
-          const dDate = d.Data || d.data || '';
-          return String(dDate).includes(dt) || String(dDate).startsWith(dt);
-        })
-        .reduce((s, d) => s + (Number(d.Quantidade || d.qtd) || 1), 0);
-
-      const drl = prod > 0 ? (desv / prod * 100) : null;
-      const label = dt.slice(5).replace('-', '/');
+        .filter(d => { const dd = d.Data||d.data||''; return String(dd).includes(dt)||String(dd).startsWith(dt); })
+        .reduce((s,d)=>s+(Number(d.Quantidade||d.qtd)||1), 0);
+      const drl = prod > 0 ? (desv/prod*100) : null;
+      const label = dt.slice(5).replace('-','/');
       const isToday = dt === new Date().toISOString().split('T')[0];
       return { dt, prod, desv, drl, label, isToday };
     });
 
-    const maxDrl = Math.max(...barras.map(b => b.drl || 0), 2);
-    const hoje = barras.find(b => b.isToday);
+    const maxDrl = Math.max(...barras.map(b=>b.drl||0), 2);
+    const hoje = barras.find(b=>b.isToday);
     const drlHoje = hoje?.drl;
 
-    // Cor por faixa
     function drlColor(v) {
-      if (v === null) return '#2A2A3E';
-      if (v > 8) return '#e74c3c';
-      if (v > 5) return '#e67e22';
-      if (v > 2) return '#f39c12';
+      if (v===null) return '#2A2A3E';
+      if (v>8) return '#e74c3c';
+      if (v>5) return '#e67e22';
+      if (v>2) return '#f39c12';
       return '#2ecc71';
     }
 
-    // KPI hoje
     const kpiHtml = drlHoje !== null
       ? `<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
            <span style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:700;color:${drlColor(drlHoje)}">${drlHoje.toFixed(1)}%</span>
            <span style="font-size:10px;color:var(--muted)">HOJE</span>
-           <span style="font-size:10px;padding:2px 8px;border-radius:2px;background:rgba(0,0,0,.2);color:${drlColor(drlHoje)}">${drlHoje <= 2 ? '✓ META' : drlHoje <= 5 ? '⚠ ATENÇÃO' : drlHoje <= 8 ? '⚠ ALERTA' : '🔴 CRÍTICO'}</span>
+           <span style="font-size:10px;padding:2px 8px;border-radius:2px;background:rgba(0,0,0,.2);color:${drlColor(drlHoje)}">${drlHoje<=2?'✓ META':drlHoje<=5?'⚠ ATENÇÃO':drlHoje<=8?'⚠ ALERTA':'🔴 CRÍTICO'}</span>
          </div>`
       : `<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Aguardando lançamento de hoje...</div>`;
 
-    // Barras dos 7 dias
     const barsHtml = `<div style="display:flex;align-items:flex-end;gap:6px;height:60px;margin-bottom:4px;">
-      ${barras.map(b => {
-        const pct = b.drl !== null ? Math.max((b.drl / maxDrl * 100), 5) : 5;
+      ${barras.map(b=>{
+        const pct = b.drl!==null ? Math.max((b.drl/maxDrl*100),5) : 5;
         const cor = drlColor(b.drl);
         return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">
-          <span style="font-size:8px;font-weight:${b.isToday?700:400};color:${cor};font-family:'Barlow Condensed',sans-serif">${b.drl !== null ? b.drl.toFixed(1)+'%' : '—'}</span>
+          <span style="font-size:8px;font-weight:${b.isToday?700:400};color:${cor};font-family:'Barlow Condensed',sans-serif">${b.drl!==null?b.drl.toFixed(1)+'%':'—'}</span>
           <div style="width:100%;border-radius:2px 2px 0 0;background:${cor};opacity:${b.isToday?1:0.6};height:${pct}%;min-height:3px;transition:height .4s"></div>
           <span style="font-size:8px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:${b.isToday?700:400}">${b.label}${b.isToday?' ◀':''}</span>
         </div>`;
@@ -667,8 +633,8 @@ async function loadDRL() {
   }
 }
 
+// ── TEMPO SEPARAÇÃO ───────────────────────────────────────────────────────────
 function renderTempoSeparacao(filtered) {
-  // Usa campo tempoSep do JSON se disponível
   const tempos = filtered.filter(d => d.tempoSep && d.tempoSep.media > 0).map(d => d.tempoSep);
 
   if (!tempos.length) {
@@ -678,8 +644,8 @@ function renderTempoSeparacao(filtered) {
     return;
   }
 
-  const media = tempos.reduce((a,t)=>a+t.media,0)/tempos.length;
-  const totalReqs = tempos.reduce((a,t)=>a+(t.total||0),0);
+  const media = tempos.reduce((a,t)=>a+t.media,0) / tempos.length;
+  const totalReqs = tempos.reduce((a,t)=>a+(t.total||0), 0);
   const fmtH = v => v < 1 ? `${Math.round(v*60)}min` : `${v.toFixed(1)}h`;
 
   document.getElementById('tempo-medio').textContent = fmtH(media);
@@ -687,24 +653,20 @@ function renderTempoSeparacao(filtered) {
   renderSemanasReq(filtered);
 }
 
-// ── REQUISIÇÕES POR SEMANA DO MÊS ────────────────────────────────────────────
 function renderSemanasReq(filtered) {
   const container = document.getElementById('req-semanas-container');
   if (!container) return;
 
-  // Usa o campo tempoSep para contar requisições por semana
-  // Agrupa por semana do mês usando os dados disponíveis
   const semanas = { 'Sem 1': 0, 'Sem 2': 0, 'Sem 3': 0, 'Sem 4': 0, 'Sem 5': 0 };
-
   filtered.forEach(d => {
     if (d.tempoSep && d.tempoSep.porSemana) {
       Object.entries(d.tempoSep.porSemana).forEach(([sem, qty]) => {
-        semanas[sem] = (semanas[sem]||0) + qty;
+        semanas[sem] = (semanas[sem] || 0) + qty;
       });
     }
   });
 
-  const total = Object.values(semanas).reduce((a,v)=>a+v,0);
+  const total = Object.values(semanas).reduce((a,v)=>a+v, 0);
   if (total === 0) {
     container.innerHTML = '<div style="color:var(--muted);font-size:10px;">Dados disponíveis após atualização do script</div>';
     return;
@@ -723,7 +685,7 @@ function renderSemanasReq(filtered) {
     }).join('');
 }
 
-// ── CHARTS ───────────────────────────────────────────────────────────────────
+// ── CHARTS ────────────────────────────────────────────────────────────────────
 const CD = {
   responsive: false, maintainAspectRatio: false, animation: false,
   plugins: { legend:{display:false}, tooltip:{backgroundColor:'#1e2330',titleColor:'#f5a623',bodyColor:'#e8ecf4',borderColor:'#f5a623',borderWidth:1}},
@@ -733,8 +695,6 @@ const CD = {
   }
 };
 
-
-// Destrói e recria canvas para evitar escala crescente
 function freshCtx(id) {
   if (charts[id]) { charts[id].destroy(); charts[id] = null; }
   const old = document.getElementById(id);
@@ -750,13 +710,12 @@ function freshCtx(id) {
   return neo.getContext('2d');
 }
 
-function drawScrapUnitChart(labels, data, meta) {
+function drawScrapUnitChart(labels, data) {
   const ctx = freshCtx('chart-scrap-unit');
-  const unitData = data.map(d => d.scrapQty>0 ? parseFloat((d.scrapCost/d.scrapQty).toFixed(2)) : null);
+  const unitData = data.map(d => d.scrapQty > 0 ? parseFloat((d.scrapCost/d.scrapQty).toFixed(2)) : null);
   charts['chart-scrap-unit'] = new Chart(ctx, { type:'line', data:{ labels, datasets:[
     { data:unitData, borderColor:'#e74c3c', backgroundColor:'rgba(231,76,60,.08)', fill:true, tension:.3,
-      pointBackgroundColor:unitData.map(v=>v!==null&&v>meta?'#e74c3c':'#f5a623'), pointRadius:4 },
-    { data:data.map(()=>meta), borderColor:'rgba(245,166,35,.4)', borderDash:[4,4], borderWidth:1, pointRadius:0, fill:false }
+      pointBackgroundColor:unitData.map(v=>v!==null?'#f5a623':'#e74c3c'), pointRadius:4 }
   ]}, options:CD });
 }
 
@@ -803,21 +762,20 @@ function setStatus(text, type) {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
-  // Load saved metas
+  // FIX: removida entrada 'meta-scrap-qty' que não existe no HTML
   const savedMetas = {
-    'meta-scrap-qty': 'brilia_meta_unit',
     'meta-scrap-cost': 'brilia_meta_cost',
-    'meta-bom': 'brilia_meta_bom',
-    'meta-efic': 'brilia_meta_efic',
-    'meta-tempo': 'brilia_meta_tempo',
+    'meta-bom':        'brilia_meta_bom',
+    'meta-efic':       'brilia_meta_efic',
   };
   Object.entries(savedMetas).forEach(([id, key]) => {
-    const v = localStorage.getItem(key);
+    const v  = localStorage.getItem(key);
     const el = document.getElementById(id);
     if (v && el) el.value = v;
   });
   loadData();
 });
+
 document.getElementById('mes-inicio').addEventListener('change', renderAll);
 document.getElementById('mes-fim').addEventListener('change', renderAll);
 </script>
