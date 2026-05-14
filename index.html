@@ -255,39 +255,28 @@ canvas { display: block; }
 
   </div>
 
-  <!-- ROW 2: Pareto + Tempo Separação + PSP -->
+  <!-- ROW 2: Pareto Custo + Tempo Separação + DRL -->
   <div class="secondary-row">
 
-    <!-- PARETO DE DEFEITOS -->
+    <!-- PARETO FINANCEIRO -->
     <div class="pareto-card">
-      <div class="pareto-title">🔬 Pareto de Defeitos — Scrap</div>
-      <div id="pareto-container">
+      <div class="pareto-title">💰 Pareto Financeiro — Custo Scrap (R$)</div>
+      <div id="pareto-custo-container">
         <div style="color:var(--muted);font-size:11px;">Carregando...</div>
       </div>
     </div>
 
-    <!-- TEMPO DE SEPARAÇÃO -->
+    <!-- TEMPO DE SEPARAÇÃO + GRÁFICO SEMANAL -->
     <div class="tempo-card">
       <div class="tempo-title">⏱ Tempo Médio de Separação — Almox</div>
-      <div class="tempo-big" id="tempo-medio">—</div>
-      <div class="tempo-unit">horas em média por requisição</div>
-      <div class="tempo-sub">
-        <div class="tempo-sub-item">
-          <div class="tempo-sub-label">Mais rápida</div>
-          <div class="tempo-sub-val" id="tempo-min">—</div>
-        </div>
-        <div class="tempo-sub-item">
-          <div class="tempo-sub-label">Mais lenta</div>
-          <div class="tempo-sub-val" id="tempo-max">—</div>
-        </div>
-        <div class="tempo-sub-item">
-          <div class="tempo-sub-label">Requisições</div>
-          <div class="tempo-sub-val" id="tempo-total">—</div>
-        </div>
-        <div class="tempo-sub-item">
-          <div class="tempo-sub-label">Meta (h)</div>
-          <div class="tempo-sub-val" id="tempo-meta-val">4h</div>
-        </div>
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px;">
+        <div class="tempo-big" id="tempo-medio">—</div>
+        <div style="font-size:10px;color:var(--muted)">por requisição</div>
+        <div style="margin-left:auto;font-size:10px;color:var(--muted)">Total: <strong style="color:var(--text)" id="tempo-total">—</strong> req</div>
+      </div>
+      <div class="tempo-title" style="margin-top:10px">Requisições por Semana do Mês</div>
+      <div id="req-semanas-container" style="display:flex;align-items:flex-end;gap:6px;height:70px;margin-top:6px;">
+        <div style="color:var(--muted);font-size:10px;">Aguardando...</div>
       </div>
     </div>
 
@@ -309,11 +298,7 @@ canvas { display: block; }
   </div>
 
   <!-- METAS -->
-  <div class="metas-row" style="grid-template-columns: repeat(5, minmax(0,1fr));">
-    <div class="meta-block">
-      <span class="meta-label">Meta C. Unit. R$</span>
-      <input type="number" class="meta-input" id="meta-scrap-qty" value="10" onchange="updateMetas()">
-    </div>
+  <div class="metas-row" style="grid-template-columns: repeat(4, minmax(0,1fr));">
     <div class="meta-block">
       <span class="meta-label">Meta Scrap R$</span>
       <input type="number" class="meta-input" id="meta-scrap-cost" value="1000" onchange="updateMetas()">
@@ -420,7 +405,7 @@ function updateMetas() {
   const mTempo = parseFloat(document.getElementById('meta-tempo').value) || 4;
 
   // Salva no localStorage
-  localStorage.setItem('brilia_meta_unit', mUnit);
+  // meta unit removida
   localStorage.setItem('brilia_meta_cost', mCost);
   localStorage.setItem('brilia_meta_bom', mBom);
   localStorage.setItem('brilia_meta_efic', mEfic);
@@ -447,7 +432,7 @@ function renderKPIsOnly() {
   }).filter(v=>v!==null);
   const avgEfic = eficArr.length ? eficArr.reduce((a,v)=>a+v,0)/eficArr.length : 0;
 
-  const mUnit  = parseFloat(document.getElementById('meta-scrap-qty').value) || 10;
+  const mUnit  = 0; // removido custo unitário
   const mCost  = parseFloat(document.getElementById('meta-scrap-cost').value) || 1000;
   const mBom   = parseFloat(document.getElementById('meta-bom').value) || 0;
   const mEfic  = parseFloat(document.getElementById('meta-efic').value) || 95;
@@ -501,13 +486,6 @@ function renderAll() {
   const mBom  = parseFloat(document.getElementById('meta-bom').value) || 0;
   const mEfic = parseFloat(document.getElementById('meta-efic').value) || 95;
 
-  // KPI 1: Custo Unitário
-  setKPI('scrap-unit',
-    `<sup>R$</sup>${custoUnit.toFixed(2)}<span style="font-size:14px;color:var(--muted)">/un</span>`,
-    custoUnit > mUnit ? 'bad' : custoUnit===0 ? 'warn' : 'ok',
-    custoUnit===0 ? '— Sem dados' : custoUnit>mUnit ? '⚠ Acima da meta' : '✓ Dentro da meta',
-    `R$${mUnit.toFixed(2)}/un`);
-
   // KPI 2: Custo Total
   setKPI('scrap-cost',
     `<sup>R$</sup>${totCost.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}`,
@@ -529,13 +507,14 @@ function renderAll() {
     mEfic+'%');
 
   // Charts
-  drawScrapUnitChart(labels, filtered, mUnit);
+  drawScrapQtyChart(labels, filtered);
   drawScrapChart(labels, filtered, mCost);
   drawBomChart(labels, filtered);
   drawEficChart(labels, filtered, mEfic);
 
-  // Pareto & Tempo (usa dados agregados do período ou do último mês com dados)
-  renderPareto(filtered);
+  // Pareto, Custo Pareto, Tempo Sep
+  renderParetoQtdMini(filtered);
+  renderParetoCusto(filtered);
   renderTempoSeparacao(filtered);
 }
 
@@ -696,23 +675,54 @@ function renderTempoSeparacao(filtered) {
 
   if (!tempos.length) {
     document.getElementById('tempo-medio').textContent = '—';
-    document.getElementById('tempo-min').textContent = '—';
-    document.getElementById('tempo-max').textContent = '—';
     document.getElementById('tempo-total').textContent = '—';
+    renderSemanasReq(filtered);
     return;
   }
 
   const media = tempos.reduce((a,t)=>a+t.media,0)/tempos.length;
-  const minVal = Math.min(...tempos.map(t=>t.min));
-  const maxVal = Math.max(...tempos.map(t=>t.max));
   const totalReqs = tempos.reduce((a,t)=>a+(t.total||0),0);
-
   const fmtH = v => v < 1 ? `${Math.round(v*60)}min` : `${v.toFixed(1)}h`;
 
   document.getElementById('tempo-medio').textContent = fmtH(media);
-  document.getElementById('tempo-min').textContent = fmtH(minVal);
-  document.getElementById('tempo-max').textContent = fmtH(maxVal);
   document.getElementById('tempo-total').textContent = totalReqs;
+  renderSemanasReq(filtered);
+}
+
+// ── REQUISIÇÕES POR SEMANA DO MÊS ────────────────────────────────────────────
+function renderSemanasReq(filtered) {
+  const container = document.getElementById('req-semanas-container');
+  if (!container) return;
+
+  // Usa o campo tempoSep para contar requisições por semana
+  // Agrupa por semana do mês usando os dados disponíveis
+  const semanas = { 'Sem 1': 0, 'Sem 2': 0, 'Sem 3': 0, 'Sem 4': 0, 'Sem 5': 0 };
+
+  filtered.forEach(d => {
+    if (d.tempoSep && d.tempoSep.porSemana) {
+      Object.entries(d.tempoSep.porSemana).forEach(([sem, qty]) => {
+        semanas[sem] = (semanas[sem]||0) + qty;
+      });
+    }
+  });
+
+  const total = Object.values(semanas).reduce((a,v)=>a+v,0);
+  if (total === 0) {
+    container.innerHTML = '<div style="color:var(--muted);font-size:10px;">Dados disponíveis após atualização do script</div>';
+    return;
+  }
+
+  const maxVal = Math.max(...Object.values(semanas), 1);
+  container.innerHTML = Object.entries(semanas)
+    .filter(([,v]) => v > 0)
+    .map(([sem, qty]) => {
+      const pct = Math.max((qty/maxVal*100), 5);
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
+        <span style="font-size:9px;color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-weight:600">${qty}</span>
+        <div style="width:100%;border-radius:2px 2px 0 0;background:var(--teal);opacity:.8;height:${pct}%;min-height:4px"></div>
+        <span style="font-size:8px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">${sem}</span>
+      </div>`;
+    }).join('');
 }
 
 // ── CHARTS ───────────────────────────────────────────────────────────────────
