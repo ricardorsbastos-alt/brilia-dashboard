@@ -352,16 +352,14 @@ setInterval(()=>{ if(--countdown<=0){countdown=REFRESH_INTERVAL;loadData();} }, 
 
 // ── SAVE & LOAD ───────────────────────────────────────────────────────────────
 function saveAndLoad() {
-  const url = document.getElementById('sheets-url').value.trim();
-  if (url) localStorage.setItem('brilia_sheets_url', url);
   loadData();
 }
 
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycby1DqOThSoS9fBW9j5ffDl_YWHa6BvcaTWI0He3UED2WL21ibpulbOgrd9nOP8W8Y4B/exec';
+
 async function loadData() {
-  const url = localStorage.getItem('brilia_sheets_url') ||
-              document.getElementById('sheets-url').value.trim();
+  const url = SHEETS_URL;
   if (url) {
-    document.getElementById('sheets-url').value = url;
     setStatus('BUSCANDO...','warn');
     try {
       const resp = await fetch(url);
@@ -805,8 +803,6 @@ function setStatus(text, type) {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
-  const saved = localStorage.getItem('brilia_sheets_url');
-  if (saved) document.getElementById('sheets-url').value = saved;
   // Load saved metas
   const savedMetas = {
     'meta-scrap-qty': 'brilia_meta_unit',
