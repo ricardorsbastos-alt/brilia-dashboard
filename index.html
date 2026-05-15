@@ -252,6 +252,10 @@ canvas { display: block; }
       <div id="req-semanas-container" style="display:flex;align-items:flex-end;gap:6px;height:70px;margin-top:6px;">
         <div style="color:var(--muted);font-size:10px;">Aguardando...</div>
       </div>
+      <div class="tempo-title" style="margin-top:12px">Pareto — Motivo das Requisições</div>
+      <div id="pareto-motivo-container" style="margin-top:6px;">
+        <div style="color:var(--muted);font-size:10px;">Aguardando...</div>
+      </div>
     </div>
 
     <!-- DRL -->
@@ -661,31 +665,68 @@ function renderSemanasReq(filtered) {
 
   const MESES_ABR = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-  // Monta lista ordenada: [{ label: 'S1 Abr', qty: N }, ...]
+  // Barras por semana com label de mês
   const barras = [];
+  const allMotivos = {};
+
   filtered.forEach(d => {
-    if (!d.tempoSep || !d.tempoSep.porSemana) return;
-    // Descobre índice do mês pelo nome
+    if (!d.tempoSep) return;
+
     const mesIdx = MESES_ABR.findIndex(m => String(d.mes).includes(m));
     const mesAbr = mesIdx >= 0 ? MESES_ABR[mesIdx] : d.mes;
-    ['Sem 1','Sem 2','Sem 3','Sem 4','Sem 5'].forEach((sem, i) => {
-      const qty = d.tempoSep.porSemana[sem] || 0;
-      if (qty > 0) barras.push({ label: `S${i+1} ${mesAbr}`, qty });
-    });
+
+    if (d.tempoSep.porSemana) {
+      ['Sem 1','Sem 2','Sem 3','Sem 4','Sem 5'].forEach((sem, i) => {
+        const qty = d.tempoSep.porSemana[sem] || 0;
+        if (qty > 0) barras.push({ label: `S${i+1} ${mesAbr}`, qty });
+      });
+    }
+
+    // Agrega motivos do período
+    if (d.tempoSep.motivos && typeof d.tempoSep.motivos === 'object') {
+      Object.entries(d.tempoSep.motivos).forEach(([k, v]) => {
+        allMotivos[k] = (allMotivos[k] || 0) + v;
+      });
+    }
   });
 
+  // ── Barras semanais ──
   if (!barras.length) {
     container.innerHTML = '<div style="color:var(--muted);font-size:10px;">Dados disponíveis após atualização do script</div>';
+  } else {
+    const maxVal = Math.max(...barras.map(b => b.qty), 1);
+    container.innerHTML = barras.map(({ label, qty }) => {
+      const pct = Math.max((qty / maxVal * 100), 5);
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
+        <span style="font-size:11px;color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-weight:600">${qty}</span>
+        <div style="width:100%;border-radius:2px 2px 0 0;background:var(--teal);opacity:.8;height:${pct}%;min-height:4px"></div>
+        <span style="font-size:9px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;text-align:center;line-height:1.2">${label}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Pareto de motivos ──
+  const paretoContainer = document.getElementById('pareto-motivo-container');
+  if (!paretoContainer) return;
+
+  if (!Object.keys(allMotivos).length) {
+    paretoContainer.innerHTML = '<div style="color:var(--muted);font-size:10px;">Sem dados de motivo</div>';
     return;
   }
 
-  const maxVal = Math.max(...barras.map(b => b.qty), 1);
-  container.innerHTML = barras.map(({ label, qty }) => {
-    const pct = Math.max((qty / maxVal * 100), 5);
-    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-      <span style="font-size:11px;color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-weight:600">${qty}</span>
-      <div style="width:100%;border-radius:2px 2px 0 0;background:var(--teal);opacity:.8;height:${pct}%;min-height:4px"></div>
-      <span style="font-size:9px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;text-align:center;line-height:1.2">${label}</span>
+  const totalMotivos = Object.values(allMotivos).reduce((a,v)=>a+v, 0);
+  const sorted = Object.entries(allMotivos).sort((a,b)=>b[1]-a[1]).slice(0, 5);
+
+  paretoContainer.innerHTML = sorted.map(([nome, qty]) => {
+    const pct = totalMotivos > 0 ? (qty/totalMotivos*100) : 0;
+    return `<div style="margin-bottom:6px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+        <span style="font-size:10px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:68%">${nome}</span>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--accent);font-weight:600">${pct.toFixed(1)}% <span style="color:var(--muted);font-size:9px">(${qty})</span></span>
+      </div>
+      <div style="background:var(--border);border-radius:2px;height:3px;">
+        <div style="height:3px;border-radius:2px;width:${pct.toFixed(1)}%;background:linear-gradient(90deg,var(--teal),var(--blue));transition:width .5s"></div>
+      </div>
     </div>`;
   }).join('');
 }
