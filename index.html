@@ -38,16 +38,46 @@ body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-se
 #clock { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 600; color: var(--text); letter-spacing: 2px; }
 
 /* PERIOD BAR */
-.period-bar { display: flex; align-items: center; justify-content: space-between; padding: 3px 10px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+.period-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 3px 10px; background: var(--surface2); border-bottom: 1px solid var(--border);
+}
 .period-label { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
 .period-controls { display: flex; align-items: center; gap: 10px; }
-.period-controls select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 4px 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; border-radius: 3px; cursor: pointer; outline: none; }
+.period-controls select {
+  background: var(--surface); border: 1px solid var(--border); color: var(--text);
+  padding: 4px 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px;
+  border-radius: 3px; cursor: pointer; outline: none;
+}
 .period-controls select:focus { border-color: var(--accent); }
+
+/* Separador visual entre grupos de controles */
+.period-separator {
+  width: 1px; height: 18px; background: var(--border); margin: 0 4px;
+}
+
+/* Label do seletor de dimensão */
+.dim-label {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 11px;
+  letter-spacing: 2px; color: var(--muted); text-transform: uppercase;
+}
+
+/* Select de dimensão com destaque sutil em teal */
+#pareto-dimensao {
+  background: var(--surface);
+  border: 1px solid var(--teal);
+  color: var(--teal);
+  padding: 4px 10px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  outline: none;
+}
+#pareto-dimensao:focus { border-color: var(--accent); color: var(--accent); }
+
 .refresh-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 12px; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border-radius: 3px; transition: all .2s; }
 .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-/* CONFIG BAR */
-.config-bar { display: none; }
 
 /* MAIN */
 .main { padding: 4px 8px; display: flex; flex-direction: column; gap: 5px; }
@@ -103,6 +133,13 @@ canvas { display: block; }
 .tempo-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 .tempo-big { font-family: 'Barlow Condensed', sans-serif; font-size: 40px; font-weight: 700; color: var(--teal); line-height: 1; }
 
+/* Título dinâmico do Pareto de Requisições */
+#pareto-req-titulo {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; letter-spacing: 3px; color: var(--teal);
+  text-transform: uppercase;
+}
+
 /* METAS */
 .metas-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .meta-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; }
@@ -138,6 +175,8 @@ canvas { display: block; }
 <div class="period-bar">
   <span class="period-label">⬦ Período de análise</span>
   <div class="period-controls">
+
+    <!-- Seletor de período -->
     <select id="mes-inicio">
       <option value="0">Jan</option><option value="1">Fev</option>
       <option value="2">Mar</option><option value="3">Abr</option>
@@ -155,6 +194,18 @@ canvas { display: block; }
       <option value="8">Set</option><option value="9">Out</option>
       <option value="10">Nov</option><option value="11">Dez</option>
     </select>
+
+    <!-- Separador visual -->
+    <div class="period-separator"></div>
+
+    <!-- Seletor de dimensão do Pareto de Requisições -->
+    <span class="dim-label">Pareto Req.</span>
+    <select id="pareto-dimensao">
+      <option value="motivo">Motivo</option>
+      <option value="area_resp">Área Responsável</option>
+      <option value="peca">Peça</option>
+    </select>
+
     <button class="refresh-btn" onclick="loadData()">↺ ATUALIZAR</button>
   </div>
 </div>
@@ -252,8 +303,12 @@ canvas { display: block; }
       <div id="req-semanas-container" style="display:flex;align-items:flex-end;gap:6px;height:70px;margin-top:6px;">
         <div style="color:var(--muted);font-size:10px;">Aguardando...</div>
       </div>
-      <div class="tempo-title" style="margin-top:12px">Pareto — Motivo das Requisições</div>
-      <div id="pareto-motivo-container" style="margin-top:6px;">
+
+      <!-- Título dinâmico do Pareto de Requisições -->
+      <div class="tempo-title" style="margin-top:12px">
+        Pareto — <span id="pareto-req-titulo">Motivo</span> das Requisições
+      </div>
+      <div id="pareto-req-container" style="margin-top:6px;">
         <div style="color:var(--muted);font-size:10px;">Aguardando...</div>
       </div>
     </div>
@@ -307,20 +362,38 @@ let charts = {};
 let rawData = null;
 let countdown = REFRESH_INTERVAL;
 
+// Mapeamento das dimensões disponíveis para o Pareto de Requisições
+// chave: valor do <option>, col: campo no JSON retornado pelo GAS, label: título amigável
+const DIMENSOES = {
+  motivo:    { col: 'motivo',    label: 'Motivo'          },
+  area_resp: { col: 'area_resp', label: 'Área Responsável' },
+  peca:      { col: 'peca',      label: 'Peça'            },
+};
+
+// Retorna a dimensão atualmente selecionada
+function getDimensao() {
+  const val = document.getElementById('pareto-dimensao').value;
+  return DIMENSOES[val] || DIMENSOES['motivo'];
+}
+
 const DEMO_DATA = [
   { mes:'Jan', scrapQty:204, scrapCost:1672.69, bomErros:0, minPlan:0, minReal:0, efic:0,
-    paretoCusto:{'Falha na produção':820.50,'Queimado':510.30,'Deformidade':220.10,'Rigidez':121.79}, pareto:null, tempoSep:null },
+    paretoCusto:{'Falha na produção':820.50,'Queimado':510.30,'Deformidade':220.10,'Rigidez':121.79},
+    pareto:null, tempoSep:null, paretoReq:null },
   { mes:'Fev', scrapQty:61,  scrapCost:632.85,  bomErros:0, minPlan:0, minReal:0, efic:0,
-    paretoCusto:{'Queimado':310.20,'Falha na produção':200.15,'Rigidez':122.50}, pareto:null, tempoSep:null },
+    paretoCusto:{'Queimado':310.20,'Falha na produção':200.15,'Rigidez':122.50},
+    pareto:null, tempoSep:null, paretoReq:null },
   { mes:'Mar', scrapQty:182, scrapCost:3799.46, bomErros:0, minPlan:0, minReal:0, efic:0,
-    paretoCusto:{'Falha na produção':1800.00,'Queimado':950.46,'Deformidade':700.00,'Rigidez':349.00}, pareto:null, tempoSep:null },
+    paretoCusto:{'Falha na produção':1800.00,'Queimado':950.46,'Deformidade':700.00,'Rigidez':349.00},
+    pareto:null, tempoSep:null, paretoReq:null },
   { mes:'Abr', scrapQty:204, scrapCost:1623.89, bomErros:5, minPlan:70896, minReal:71620.74, efic:101.02,
-    paretoCusto:{'Falha na produção':700.00,'Queimado':480.89,'Deformidade':280.00,'Rigidez':163.00}, pareto:null, tempoSep:null },
+    paretoCusto:{'Falha na produção':700.00,'Queimado':480.89,'Deformidade':280.00,'Rigidez':163.00},
+    pareto:null, tempoSep:null, paretoReq:null },
   { mes:'Mai', scrapQty:0,   scrapCost:0,        bomErros:1, minPlan:23632, minReal:15539, efic:0,
-    paretoCusto:null, pareto:null, tempoSep:null },
+    paretoCusto:null, pareto:null, tempoSep:null, paretoReq:null },
   ...Array(7).fill(null).map((_,i)=>({
     mes:MESES[5+i], scrapQty:0, scrapCost:0, bomErros:0, minPlan:0, minReal:0, efic:0,
-    paretoCusto:null, pareto:null, tempoSep:null
+    paretoCusto:null, pareto:null, tempoSep:null, paretoReq:null
   }))
 ];
 
@@ -335,8 +408,6 @@ setInterval(()=>{ if(--countdown<=0){countdown=REFRESH_INTERVAL;loadData();} }, 
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycby1DqOThSoS9fBW9j5ffDl_YWHa6BvcaTWI0He3UED2WL21ibpulbOgrd9nOP8W8Y4B/exec';
 
 // ── LOAD DATA ─────────────────────────────────────────────────────────────────
-function saveAndLoad() { loadData(); }
-
 async function loadData() {
   setStatus('BUSCANDO...','warn');
   try {
@@ -346,16 +417,19 @@ async function loadData() {
     rawData = json
       .filter(d => MESES.some(m => String(d.mes).includes(m)))
       .map(d => ({
-        mes:         String(d.mes),
-        scrapQty:    parseFloat(d.scrapQty)  || 0,
-        scrapCost:   parseFloat(d.scrapCost) || 0,
-        bomErros:    parseFloat(d.bomErros)  || 0,
-        minPlan:     parseFloat(d.minPlan)   || 0,
-        minReal:     parseFloat(d.minReal)   || 0,
-        efic:        parseFloat(d.efic)      || 0,
-        pareto:      d.pareto      || null,
-        paretoCusto: d.paretoCusto || null,  // ← campo correto do GAS
-        tempoSep:    d.tempoSep    || null,
+        mes:              String(d.mes),
+        scrapQty:         parseFloat(d.scrapQty)  || 0,
+        scrapCost:        parseFloat(d.scrapCost) || 0,
+        bomErros:         parseFloat(d.bomErros)  || 0,
+        minPlan:          parseFloat(d.minPlan)   || 0,
+        minReal:          parseFloat(d.minReal)   || 0,
+        efic:             parseFloat(d.efic)      || 0,
+        pareto:           d.pareto      || null,
+        paretoCusto:      d.paretoCusto || null,
+        tempoSep:         d.tempoSep    || null,
+        // paretoReq já vem agrupado pela dimensão ativa no GAS
+        paretoReq:        d.paretoReq   || null,
+        paretoReqDimensao: d.paretoReqDimensao || null,
       }));
     if (!rawData.length) throw new Error('Sem dados');
     setStatus('ONLINE','ok');
@@ -374,11 +448,9 @@ function updateMetas() {
   const mCost = parseFloat(document.getElementById('meta-scrap-cost').value) || 1000;
   const mBom  = parseFloat(document.getElementById('meta-bom').value)        || 0;
   const mEfic = parseFloat(document.getElementById('meta-efic').value)       || 95;
-
   localStorage.setItem('brilia_meta_cost', mCost);
   localStorage.setItem('brilia_meta_bom',  mBom);
   localStorage.setItem('brilia_meta_efic', mEfic);
-
   if (rawData) renderKPIsOnly();
 }
 
@@ -414,27 +486,24 @@ function renderKPIsOnly() {
   setKPI('scrap-unit',
     `<sup>R$</sup>${custoUnit.toFixed(2)}<span style="font-size:14px;color:var(--muted)">/un</span>`,
     custoUnit === 0 ? 'warn' : 'info',
-    custoUnit === 0 ? '— Sem dados' : `R$ ${custoUnit.toFixed(2)} por peça`,
-    '—');
+    custoUnit === 0 ? '— Sem dados' : `R$ ${custoUnit.toFixed(2)} por peça`, '—');
 
   setKPI('scrap-cost',
     `<sup>R$</sup>${totCost.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}`,
     totCost > mCost ? 'bad' : 'ok',
-    totCost > mCost ? '⚠ Acima da meta' : '✓ Dentro da meta',
-    `R$${fmt(mCost)}`);
+    totCost > mCost ? '⚠ Acima da meta' : '✓ Dentro da meta', `R$${fmt(mCost)}`);
 
   setKPI('bom', totBom,
     totBom > mBom ? 'bad' : 'ok',
-    totBom > mBom ? `⚠ ${totBom} erros encontrados` : '✓ Dentro da meta',
-    mBom);
+    totBom > mBom ? `⚠ ${totBom} erros encontrados` : '✓ Dentro da meta', mBom);
 
   setKPI('efic',
     `${avgEfic.toFixed(1)}<sup>%</sup>`,
     avgEfic < mEfic && avgEfic > 0 ? 'bad' : avgEfic === 0 ? 'warn' : 'ok',
-    avgEfic === 0 ? '— Sem dados' : avgEfic < mEfic ? `⚠ ${avgEfic.toFixed(1)}% — abaixo da meta` : `✓ ${avgEfic.toFixed(1)}% — na meta`,
+    avgEfic === 0 ? '— Sem dados' : avgEfic < mEfic
+      ? `⚠ ${avgEfic.toFixed(1)}% — abaixo da meta`
+      : `✓ ${avgEfic.toFixed(1)}% — na meta`,
     mEfic + '%');
-
-  document.getElementById('m-efic').textContent = mEfic + '%';
 }
 
 // ── RENDER ALL ────────────────────────────────────────────────────────────────
@@ -459,40 +528,32 @@ function renderAll() {
 
   const { mCost, mBom, mEfic } = getMetas();
 
-  // KPI 1: Custo Unitário (sem meta configurável — calculado)
   setKPI('scrap-unit',
     `<sup>R$</sup>${custoUnit.toFixed(2)}<span style="font-size:14px;color:var(--muted)">/un</span>`,
     custoUnit === 0 ? 'warn' : 'info',
-    custoUnit === 0 ? '— Sem dados' : `R$ ${custoUnit.toFixed(2)} por peça`,
-    '—');
+    custoUnit === 0 ? '— Sem dados' : `R$ ${custoUnit.toFixed(2)} por peça`, '—');
 
-  // KPI 2: Custo Total
   setKPI('scrap-cost',
     `<sup>R$</sup>${totCost.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}`,
     totCost > mCost ? 'bad' : 'ok',
-    totCost > mCost ? '⚠ Acima da meta' : '✓ Dentro da meta',
-    `R$${fmt(mCost)}`);
+    totCost > mCost ? '⚠ Acima da meta' : '✓ Dentro da meta', `R$${fmt(mCost)}`);
 
-  // KPI 3: BOM
   setKPI('bom', totBom,
     totBom > mBom ? 'bad' : 'ok',
-    totBom > mBom ? `⚠ ${totBom} erros encontrados` : '✓ Dentro da meta',
-    mBom);
+    totBom > mBom ? `⚠ ${totBom} erros encontrados` : '✓ Dentro da meta', mBom);
 
-  // KPI 4: Eficiência
   setKPI('efic',
     `${avgEfic.toFixed(1)}<sup>%</sup>`,
     avgEfic < mEfic && avgEfic > 0 ? 'bad' : avgEfic === 0 ? 'warn' : 'ok',
-    avgEfic === 0 ? '— Sem dados' : avgEfic < mEfic ? `⚠ ${avgEfic.toFixed(1)}% — abaixo da meta` : `✓ ${avgEfic.toFixed(1)}% — na meta`,
+    avgEfic === 0 ? '— Sem dados' : avgEfic < mEfic
+      ? `⚠ ${avgEfic.toFixed(1)}% — abaixo da meta`
+      : `✓ ${avgEfic.toFixed(1)}% — na meta`,
     mEfic + '%');
 
-  // Charts
   renderParetoQtd(filtered);
   drawScrapChart(labels, filtered, mCost);
   drawBomChart(labels, filtered);
   drawEficChart(labels, filtered, mEfic);
-
-  // Pareto Financeiro e Tempo Separação
   renderParetoCusto(filtered);
   renderTempoSeparacao(filtered);
 }
@@ -509,12 +570,10 @@ function setKPI(id, htmlVal, status, statusText, meta) {
 }
 
 // ── PARETO FINANCEIRO ─────────────────────────────────────────────────────────
-// FIX: usa container correto (pareto-custo-container) e campo paretoCusto do JSON
 function renderParetoCusto(filtered) {
   const container = document.getElementById('pareto-custo-container');
   if (!container) return;
 
-  // Agrega paretoCusto de todos os meses do período
   const allCusto = {};
   filtered.forEach(d => {
     if (d.paretoCusto && typeof d.paretoCusto === 'object') {
@@ -524,9 +583,7 @@ function renderParetoCusto(filtered) {
     }
   });
 
-  const hasDados = Object.keys(allCusto).length > 0;
-
-  if (!hasDados) {
+  if (!Object.keys(allCusto).length) {
     container.innerHTML = `<div style="color:var(--muted);font-size:11px;line-height:1.8">
       Pareto financeiro disponível após<br>atualização do Apps Script.<br><br>
       <span style="color:var(--accent);font-size:10px">Execute "Atualizar Scrap" no menu<br>da planilha para popular os dados.</span>
@@ -539,9 +596,7 @@ function renderParetoCusto(filtered) {
 
   container.innerHTML = sorted.map(([nome, custo]) => {
     const pct = totalCusto > 0 ? (custo / totalCusto * 100) : 0;
-    const custoFmt = custo >= 1000
-      ? `R$${(custo/1000).toFixed(1)}k`
-      : `R$${custo.toFixed(2)}`;
+    const custoFmt = custo >= 1000 ? `R$${(custo/1000).toFixed(1)}k` : `R$${custo.toFixed(2)}`;
     return `<div class="pareto-item">
       <div class="pareto-header">
         <span class="pareto-name">${nome}</span>
@@ -553,7 +608,6 @@ function renderParetoCusto(filtered) {
     </div>`;
   }).join('');
 
-  // Rodapé com total
   container.innerHTML += `<div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:10px;">
     <span style="color:var(--muted)">TOTAL SCRAP</span>
     <span style="color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-weight:600">
@@ -586,10 +640,10 @@ async function loadDRL() {
 
     const barras = dias.map(dt => {
       const prod = producoes
-        .filter(p => { const pd = p.Data||p.date||''; return String(pd).includes(dt)||String(pd).startsWith(dt); })
+        .filter(p=>{ const pd=p.Data||p.date||''; return String(pd).includes(dt)||String(pd).startsWith(dt); })
         .reduce((s,p)=>s+(Number(p.Quantidade||p.qty)||0), 0);
       const desv = desvios
-        .filter(d => { const dd = d.Data||d.data||''; return String(dd).includes(dt)||String(dd).startsWith(dt); })
+        .filter(d=>{ const dd=d.Data||d.data||''; return String(dd).includes(dt)||String(dd).startsWith(dt); })
         .reduce((s,d)=>s+(Number(d.Quantidade||d.qtd)||1), 0);
       const drl = prod > 0 ? (desv/prod*100) : null;
       const label = dt.slice(5).replace('-','/');
@@ -598,7 +652,7 @@ async function loadDRL() {
     });
 
     const maxDrl = Math.max(...barras.map(b=>b.drl||0), 2);
-    const hoje = barras.find(b=>b.isToday);
+    const hoje   = barras.find(b=>b.isToday);
     const drlHoje = hoje?.drl;
 
     function drlColor(v) {
@@ -630,7 +684,6 @@ async function loadDRL() {
     </div>`;
 
     container.innerHTML = kpiHtml + barsHtml;
-
   } catch(e) {
     container.innerHTML = `<div style="font-size:10px;color:var(--muted);line-height:1.8">
       Conectando ao sistema de desvios...<br>
@@ -650,24 +703,28 @@ function renderTempoSeparacao(filtered) {
     return;
   }
 
-  const media = tempos.reduce((a,t)=>a+t.media,0) / tempos.length;
+  const media     = tempos.reduce((a,t)=>a+t.media,0) / tempos.length;
   const totalReqs = tempos.reduce((a,t)=>a+(t.total||0), 0);
-  const fmtH = v => v < 1 ? `${Math.round(v*60)}min` : `${v.toFixed(1)}h`;
 
-  document.getElementById('tempo-medio').textContent = fmtH(media);
+  // media agora vem em minutos (GAS v5)
+  const fmtMin = v => v < 60 ? `${Math.round(v)}min` : `${(v/60).toFixed(1)}h`;
+
+  document.getElementById('tempo-medio').textContent = fmtMin(media);
   document.getElementById('tempo-total').textContent = totalReqs;
   renderSemanasReq(filtered);
 }
 
+// ── SEMANAS + PARETO DE REQUISIÇÕES (dimensão configurável) ───────────────────
 function renderSemanasReq(filtered) {
-  const container = document.getElementById('req-semanas-container');
-  if (!container) return;
+  // Barras semanais
+  const containerSem = document.getElementById('req-semanas-container');
+  if (!containerSem) return;
 
   const MESES_ABR = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-
-  // Barras por semana com label de mês
   const barras = [];
-  const allMotivos = {};
+
+  // Agrega o paretoReq pelo campo da dimensão escolhida
+  const allReq = {};
 
   filtered.forEach(d => {
     if (!d.tempoSep) return;
@@ -681,21 +738,23 @@ function renderSemanasReq(filtered) {
         if (qty > 0) barras.push({ label: `S${i+1} ${mesAbr}`, qty });
       });
     }
+  });
 
-    // Agrega motivos do período
-    if (d.tempoSep.motivos && typeof d.tempoSep.motivos === 'object') {
-      Object.entries(d.tempoSep.motivos).forEach(([k, v]) => {
-        allMotivos[k] = (allMotivos[k] || 0) + v;
+  // Agrega paretoReq de todos os meses filtrados
+  filtered.forEach(d => {
+    if (d.paretoReq && typeof d.paretoReq === 'object') {
+      Object.entries(d.paretoReq).forEach(([k, v]) => {
+        allReq[k] = (allReq[k] || 0) + v;
       });
     }
   });
 
-  // ── Barras semanais ──
+  // Renderiza barras semanais
   if (!barras.length) {
-    container.innerHTML = '<div style="color:var(--muted);font-size:10px;">Dados disponíveis após atualização do script</div>';
+    containerSem.innerHTML = '<div style="color:var(--muted);font-size:10px;">Dados disponíveis após atualização do script</div>';
   } else {
     const maxVal = Math.max(...barras.map(b => b.qty), 1);
-    container.innerHTML = barras.map(({ label, qty }) => {
+    containerSem.innerHTML = barras.map(({ label, qty }) => {
       const pct = Math.max((qty / maxVal * 100), 5);
       return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
         <span style="font-size:11px;color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-weight:600">${qty}</span>
@@ -705,20 +764,25 @@ function renderSemanasReq(filtered) {
     }).join('');
   }
 
-  // ── Pareto de motivos ──
-  const paretoContainer = document.getElementById('pareto-motivo-container');
+  // Atualiza o título dinâmico do Pareto de Requisições
+  const dim = getDimensao();
+  const tituloEl = document.getElementById('pareto-req-titulo');
+  if (tituloEl) tituloEl.textContent = dim.label;
+
+  // Renderiza Pareto de Requisições
+  const paretoContainer = document.getElementById('pareto-req-container');
   if (!paretoContainer) return;
 
-  if (!Object.keys(allMotivos).length) {
-    paretoContainer.innerHTML = '<div style="color:var(--muted);font-size:10px;">Sem dados de motivo</div>';
+  if (!Object.keys(allReq).length) {
+    paretoContainer.innerHTML = '<div style="color:var(--muted);font-size:10px;">Sem dados de ' + dim.label.toLowerCase() + '</div>';
     return;
   }
 
-  const totalMotivos = Object.values(allMotivos).reduce((a,v)=>a+v, 0);
-  const sorted = Object.entries(allMotivos).sort((a,b)=>b[1]-a[1]).slice(0, 5);
+  const totalReq = Object.values(allReq).reduce((a,v)=>a+v, 0);
+  const sorted   = Object.entries(allReq).sort((a,b)=>b[1]-a[1]).slice(0, 5);
 
   paretoContainer.innerHTML = sorted.map(([nome, qty]) => {
-    const pct = totalMotivos > 0 ? (qty/totalMotivos*100) : 0;
+    const pct = totalReq > 0 ? (qty/totalReq*100) : 0;
     return `<div style="margin-bottom:6px;">
       <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
         <span style="font-size:10px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:68%">${nome}</span>
@@ -731,7 +795,7 @@ function renderSemanasReq(filtered) {
   }).join('');
 }
 
-// ── PARETO QUANTIDADE (col 1, substitui gráfico custo unitário) ───────────────
+// ── PARETO QUANTIDADE ─────────────────────────────────────────────────────────
 function renderParetoQtd(filtered) {
   const container = document.getElementById('pareto-qtd-container');
   if (!container) return;
@@ -785,22 +849,10 @@ function freshCtx(id) {
   const parent = old.parentNode;
   const w = parent.offsetWidth || 300;
   const neo = document.createElement('canvas');
-  neo.id = id;
-  neo.width  = w;
-  neo.height = 100;
-  neo.style.width  = w + 'px';
-  neo.style.height = '100px';
+  neo.id = id; neo.width = w; neo.height = 100;
+  neo.style.width = w + 'px'; neo.style.height = '100px';
   parent.replaceChild(neo, old);
   return neo.getContext('2d');
-}
-
-function drawScrapUnitChart(labels, data) {
-  const ctx = freshCtx('chart-scrap-unit');
-  const unitData = data.map(d => d.scrapQty > 0 ? parseFloat((d.scrapCost/d.scrapQty).toFixed(2)) : null);
-  charts['chart-scrap-unit'] = new Chart(ctx, { type:'line', data:{ labels, datasets:[
-    { data:unitData, borderColor:'#e74c3c', backgroundColor:'rgba(231,76,60,.08)', fill:true, tension:.3,
-      pointBackgroundColor:unitData.map(v=>v!==null?'#f5a623':'#e74c3c'), pointRadius:4 }
-  ]}, options:CD });
 }
 
 function drawScrapChart(labels, data, meta) {
@@ -846,7 +898,7 @@ function setStatus(text, type) {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
-  // FIX: removida entrada 'meta-scrap-qty' que não existe no HTML
+  // Restaura metas salvas
   const savedMetas = {
     'meta-scrap-cost': 'brilia_meta_cost',
     'meta-bom':        'brilia_meta_bom',
@@ -857,11 +909,25 @@ window.addEventListener('load', () => {
     const el = document.getElementById(id);
     if (v && el) el.value = v;
   });
+
+  // Restaura dimensão salva do Pareto de Requisições
+  const dimSalva = localStorage.getItem('brilia_pareto_dimensao');
+  if (dimSalva && document.querySelector(`#pareto-dimensao option[value="${dimSalva}"]`)) {
+    document.getElementById('pareto-dimensao').value = dimSalva;
+  }
+
   loadData();
 });
 
+// Listeners de período e dimensão
 document.getElementById('mes-inicio').addEventListener('change', renderAll);
 document.getElementById('mes-fim').addEventListener('change', renderAll);
+
+// Ao trocar a dimensão: salva a preferência e rerenderiza sem buscar dados novamente
+document.getElementById('pareto-dimensao').addEventListener('change', () => {
+  localStorage.setItem('brilia_pareto_dimensao', document.getElementById('pareto-dimensao').value);
+  if (rawData) renderAll();
+});
 </script>
 </body>
 </html>
