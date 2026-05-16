@@ -38,42 +38,20 @@ body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-se
 #clock { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 600; color: var(--text); letter-spacing: 2px; }
 
 /* PERIOD BAR */
-.period-bar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 3px 10px; background: var(--surface2); border-bottom: 1px solid var(--border);
-}
+.period-bar { display: flex; align-items: center; justify-content: space-between; padding: 3px 10px; background: var(--surface2); border-bottom: 1px solid var(--border); }
 .period-label { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
 .period-controls { display: flex; align-items: center; gap: 10px; }
-.period-controls select {
-  background: var(--surface); border: 1px solid var(--border); color: var(--text);
-  padding: 4px 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px;
-  border-radius: 3px; cursor: pointer; outline: none;
-}
+.period-controls select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 4px 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; border-radius: 3px; cursor: pointer; outline: none; }
 .period-controls select:focus { border-color: var(--accent); }
 
-/* Separador visual entre grupos de controles */
-.period-separator {
-  width: 1px; height: 18px; background: var(--border); margin: 0 4px;
-}
+/* Separador visual entre grupos */
+.period-sep { width: 1px; height: 18px; background: var(--border); margin: 0 2px; }
 
 /* Label do seletor de dimensão */
-.dim-label {
-  font-family: 'Barlow Condensed', sans-serif; font-size: 11px;
-  letter-spacing: 2px; color: var(--muted); text-transform: uppercase;
-}
+.dim-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
 
-/* Select de dimensão com destaque sutil em teal */
-#pareto-dimensao {
-  background: var(--surface);
-  border: 1px solid var(--teal);
-  color: var(--teal);
-  padding: 4px 10px;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 14px;
-  border-radius: 3px;
-  cursor: pointer;
-  outline: none;
-}
+/* Select de dimensão com destaque teal */
+#pareto-dimensao { background: var(--surface); border: 1px solid var(--teal); color: var(--teal); padding: 4px 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; border-radius: 3px; cursor: pointer; outline: none; }
 #pareto-dimensao:focus { border-color: var(--accent); color: var(--accent); }
 
 .refresh-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 12px; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border-radius: 3px; transition: all .2s; }
@@ -89,19 +67,19 @@ body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-se
 /* KPI CARD */
 .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 8px 10px 8px; position: relative; overflow: hidden; }
 .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
-.kpi-card.c-red::before { background: var(--red); }
+.kpi-card.c-red::before    { background: var(--red); }
 .kpi-card.c-yellow::before { background: var(--yellow); }
-.kpi-card.c-blue::before { background: var(--blue); }
-.kpi-card.c-green::before { background: var(--green); }
-.kpi-card.c-teal::before { background: var(--teal); }
+.kpi-card.c-blue::before   { background: var(--blue); }
+.kpi-card.c-green::before  { background: var(--green); }
+.kpi-card.c-teal::before   { background: var(--teal); }
 .kpi-card.c-purple::before { background: var(--purple); }
 .kpi-icon { font-size: 17px; margin-bottom: 6px; opacity: .7; }
 .kpi-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 2px; }
 .kpi-value { font-family: 'Barlow Condensed', sans-serif; font-size: 29px; font-weight: 700; line-height: 1; color: var(--text); }
 .kpi-value sup { font-size: 13px; font-weight: 400; color: var(--muted); vertical-align: super; }
 .kpi-status { display: inline-flex; align-items: center; gap: 4px; margin-top: 3px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; }
-.kpi-status.ok { background: rgba(46,204,113,.12); color: var(--green); }
-.kpi-status.bad { background: rgba(231,76,60,.12); color: var(--red); }
+.kpi-status.ok   { background: rgba(46,204,113,.12); color: var(--green); }
+.kpi-status.bad  { background: rgba(231,76,60,.12);  color: var(--red); }
 .kpi-status.warn { background: rgba(243,156,18,.12); color: var(--yellow); }
 .kpi-status.info { background: rgba(52,152,219,.12); color: var(--blue); }
 .kpi-status .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
@@ -133,15 +111,8 @@ canvas { display: block; }
 .tempo-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 .tempo-big { font-family: 'Barlow Condensed', sans-serif; font-size: 40px; font-weight: 700; color: var(--teal); line-height: 1; }
 
-/* Título dinâmico do Pareto de Requisições */
-#pareto-req-titulo {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px; letter-spacing: 3px; color: var(--teal);
-  text-transform: uppercase;
-}
-
 /* METAS */
-.metas-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.metas-row { display: grid; gap: 6px; }
 .meta-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; }
 .meta-label { font-size: 11px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif; min-width: 80px; }
 .meta-input { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--accent); padding: 3px 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 600; text-align: right; border-radius: 2px; outline: none; width: 80px; }
@@ -176,7 +147,7 @@ canvas { display: block; }
   <span class="period-label">⬦ Período de análise</span>
   <div class="period-controls">
 
-    <!-- Seletor de período -->
+    <!-- Seletores de período -->
     <select id="mes-inicio">
       <option value="0">Jan</option><option value="1">Fev</option>
       <option value="2">Mar</option><option value="3">Abr</option>
@@ -196,13 +167,13 @@ canvas { display: block; }
     </select>
 
     <!-- Separador visual -->
-    <div class="period-separator"></div>
+    <div class="period-sep"></div>
 
     <!-- Seletor de dimensão do Pareto de Requisições -->
     <span class="dim-label">Pareto Req.</span>
     <select id="pareto-dimensao">
       <option value="motivo">Motivo</option>
-      <option value="area_resp">Área Responsável</option>
+      <option value="area">Área Responsável</option>
       <option value="peca">Peça</option>
     </select>
 
@@ -304,9 +275,9 @@ canvas { display: block; }
         <div style="color:var(--muted);font-size:10px;">Aguardando...</div>
       </div>
 
-      <!-- Título dinâmico do Pareto de Requisições -->
+      <!-- Título dinâmico — atualizado pelo JS ao trocar o dropdown -->
       <div class="tempo-title" style="margin-top:12px">
-        Pareto — <span id="pareto-req-titulo">Motivo</span> das Requisições
+        Pareto — <span id="pareto-req-titulo" style="color:var(--teal)">Motivo</span> das Requisições
       </div>
       <div id="pareto-req-container" style="margin-top:6px;">
         <div style="color:var(--muted);font-size:10px;">Aguardando...</div>
@@ -362,15 +333,13 @@ let charts = {};
 let rawData = null;
 let countdown = REFRESH_INTERVAL;
 
-// Mapeamento das dimensões disponíveis para o Pareto de Requisições
-// chave: valor do <option>, col: campo no JSON retornado pelo GAS, label: título amigável
+// Mapeamento dimensão → campo no JSON do GAS → label exibido no título
 const DIMENSOES = {
-  motivo:    { col: 'motivo',    label: 'Motivo'          },
-  area_resp: { col: 'area_resp', label: 'Área Responsável' },
-  peca:      { col: 'peca',      label: 'Peça'            },
+  motivo: { campo: 'paretoReqMotivo', label: 'Motivo'           },
+  area:   { campo: 'paretoReqArea',   label: 'Área Responsável' },
+  peca:   { campo: 'paretoReqPeca',   label: 'Peça'             },
 };
 
-// Retorna a dimensão atualmente selecionada
 function getDimensao() {
   const val = document.getElementById('pareto-dimensao').value;
   return DIMENSOES[val] || DIMENSOES['motivo'];
@@ -379,21 +348,27 @@ function getDimensao() {
 const DEMO_DATA = [
   { mes:'Jan', scrapQty:204, scrapCost:1672.69, bomErros:0, minPlan:0, minReal:0, efic:0,
     paretoCusto:{'Falha na produção':820.50,'Queimado':510.30,'Deformidade':220.10,'Rigidez':121.79},
-    pareto:null, tempoSep:null, paretoReq:null },
-  { mes:'Fev', scrapQty:61,  scrapCost:632.85,  bomErros:0, minPlan:0, minReal:0, efic:0,
+    pareto:null, tempoSep:null,
+    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null },
+  { mes:'Fev', scrapQty:61, scrapCost:632.85, bomErros:0, minPlan:0, minReal:0, efic:0,
     paretoCusto:{'Queimado':310.20,'Falha na produção':200.15,'Rigidez':122.50},
-    pareto:null, tempoSep:null, paretoReq:null },
+    pareto:null, tempoSep:null,
+    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null },
   { mes:'Mar', scrapQty:182, scrapCost:3799.46, bomErros:0, minPlan:0, minReal:0, efic:0,
     paretoCusto:{'Falha na produção':1800.00,'Queimado':950.46,'Deformidade':700.00,'Rigidez':349.00},
-    pareto:null, tempoSep:null, paretoReq:null },
+    pareto:null, tempoSep:null,
+    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null },
   { mes:'Abr', scrapQty:204, scrapCost:1623.89, bomErros:5, minPlan:70896, minReal:71620.74, efic:101.02,
     paretoCusto:{'Falha na produção':700.00,'Queimado':480.89,'Deformidade':280.00,'Rigidez':163.00},
-    pareto:null, tempoSep:null, paretoReq:null },
-  { mes:'Mai', scrapQty:0,   scrapCost:0,        bomErros:1, minPlan:23632, minReal:15539, efic:0,
-    paretoCusto:null, pareto:null, tempoSep:null, paretoReq:null },
+    pareto:null, tempoSep:null,
+    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null },
+  { mes:'Mai', scrapQty:0, scrapCost:0, bomErros:1, minPlan:23632, minReal:15539, efic:0,
+    paretoCusto:null, pareto:null, tempoSep:null,
+    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null },
   ...Array(7).fill(null).map((_,i)=>({
     mes:MESES[5+i], scrapQty:0, scrapCost:0, bomErros:0, minPlan:0, minReal:0, efic:0,
-    paretoCusto:null, pareto:null, tempoSep:null, paretoReq:null
+    paretoCusto:null, pareto:null, tempoSep:null,
+    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null
   }))
 ];
 
@@ -417,19 +392,20 @@ async function loadData() {
     rawData = json
       .filter(d => MESES.some(m => String(d.mes).includes(m)))
       .map(d => ({
-        mes:              String(d.mes),
-        scrapQty:         parseFloat(d.scrapQty)  || 0,
-        scrapCost:        parseFloat(d.scrapCost) || 0,
-        bomErros:         parseFloat(d.bomErros)  || 0,
-        minPlan:          parseFloat(d.minPlan)   || 0,
-        minReal:          parseFloat(d.minReal)   || 0,
-        efic:             parseFloat(d.efic)      || 0,
-        pareto:           d.pareto      || null,
-        paretoCusto:      d.paretoCusto || null,
-        tempoSep:         d.tempoSep    || null,
-        // paretoReq já vem agrupado pela dimensão ativa no GAS
-        paretoReq:        d.paretoReq   || null,
-        paretoReqDimensao: d.paretoReqDimensao || null,
+        mes:             String(d.mes),
+        scrapQty:        parseFloat(d.scrapQty)  || 0,
+        scrapCost:       parseFloat(d.scrapCost) || 0,
+        bomErros:        parseFloat(d.bomErros)  || 0,
+        minPlan:         parseFloat(d.minPlan)   || 0,
+        minReal:         parseFloat(d.minReal)   || 0,
+        efic:            parseFloat(d.efic)      || 0,
+        pareto:          d.pareto      || null,
+        paretoCusto:     d.paretoCusto || null,
+        tempoSep:        d.tempoSep    || null,
+        // As 3 dimensões pré-calculadas pelo GAS
+        paretoReqMotivo: d.paretoReqMotivo || null,
+        paretoReqArea:   d.paretoReqArea   || null,
+        paretoReqPeca:   d.paretoReqPeca   || null,
       }));
     if (!rawData.length) throw new Error('Sem dados');
     setStatus('ONLINE','ok');
@@ -462,7 +438,7 @@ function getMetas() {
   };
 }
 
-// ── KPIs ONLY (sem recriar gráficos) ─────────────────────────────────────────
+// ── KPIs ONLY ─────────────────────────────────────────────────────────────────
 function renderKPIsOnly() {
   if (!rawData) return;
   const ini = parseInt(document.getElementById('mes-inicio').value);
@@ -480,23 +456,19 @@ function renderKPIsOnly() {
     return null;
   }).filter(v=>v!==null);
   const avgEfic = eficArr.length ? eficArr.reduce((a,v)=>a+v,0)/eficArr.length : 0;
-
   const { mCost, mBom, mEfic } = getMetas();
 
   setKPI('scrap-unit',
     `<sup>R$</sup>${custoUnit.toFixed(2)}<span style="font-size:14px;color:var(--muted)">/un</span>`,
     custoUnit === 0 ? 'warn' : 'info',
     custoUnit === 0 ? '— Sem dados' : `R$ ${custoUnit.toFixed(2)} por peça`, '—');
-
   setKPI('scrap-cost',
     `<sup>R$</sup>${totCost.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}`,
     totCost > mCost ? 'bad' : 'ok',
     totCost > mCost ? '⚠ Acima da meta' : '✓ Dentro da meta', `R$${fmt(mCost)}`);
-
   setKPI('bom', totBom,
     totBom > mBom ? 'bad' : 'ok',
     totBom > mBom ? `⚠ ${totBom} erros encontrados` : '✓ Dentro da meta', mBom);
-
   setKPI('efic',
     `${avgEfic.toFixed(1)}<sup>%</sup>`,
     avgEfic < mEfic && avgEfic > 0 ? 'bad' : avgEfic === 0 ? 'warn' : 'ok',
@@ -509,8 +481,8 @@ function renderKPIsOnly() {
 // ── RENDER ALL ────────────────────────────────────────────────────────────────
 function renderAll() {
   if (!rawData) return;
-  const ini = parseInt(document.getElementById('mes-inicio').value);
-  const fim = parseInt(document.getElementById('mes-fim').value);
+  const ini      = parseInt(document.getElementById('mes-inicio').value);
+  const fim      = parseInt(document.getElementById('mes-fim').value);
   const filtered = rawData.filter((_,i) => i >= ini && i <= fim);
   const labels   = filtered.map(d => d.mes);
 
@@ -520,28 +492,24 @@ function renderAll() {
   const custoUnit = totQty > 0 ? totCost / totQty : 0;
 
   const eficArr = filtered.map(d => {
-    if (d.minPlan > 0 && d.minReal > 0) return d.minReal/d.minPlan*100;
-    if (d.efic > 0) return d.efic;
+    if (d.minPlan>0&&d.minReal>0) return d.minReal/d.minPlan*100;
+    if (d.efic>0) return d.efic;
     return null;
   }).filter(v=>v!==null);
   const avgEfic = eficArr.length ? eficArr.reduce((a,v)=>a+v,0)/eficArr.length : 0;
-
   const { mCost, mBom, mEfic } = getMetas();
 
   setKPI('scrap-unit',
     `<sup>R$</sup>${custoUnit.toFixed(2)}<span style="font-size:14px;color:var(--muted)">/un</span>`,
     custoUnit === 0 ? 'warn' : 'info',
     custoUnit === 0 ? '— Sem dados' : `R$ ${custoUnit.toFixed(2)} por peça`, '—');
-
   setKPI('scrap-cost',
     `<sup>R$</sup>${totCost.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}`,
     totCost > mCost ? 'bad' : 'ok',
     totCost > mCost ? '⚠ Acima da meta' : '✓ Dentro da meta', `R$${fmt(mCost)}`);
-
   setKPI('bom', totBom,
     totBom > mBom ? 'bad' : 'ok',
     totBom > mBom ? `⚠ ${totBom} erros encontrados` : '✓ Dentro da meta', mBom);
-
   setKPI('efic',
     `${avgEfic.toFixed(1)}<sup>%</sup>`,
     avgEfic < mEfic && avgEfic > 0 ? 'bad' : avgEfic === 0 ? 'warn' : 'ok',
@@ -577,9 +545,7 @@ function renderParetoCusto(filtered) {
   const allCusto = {};
   filtered.forEach(d => {
     if (d.paretoCusto && typeof d.paretoCusto === 'object') {
-      Object.entries(d.paretoCusto).forEach(([k, v]) => {
-        allCusto[k] = (allCusto[k] || 0) + v;
-      });
+      Object.entries(d.paretoCusto).forEach(([k, v]) => { allCusto[k] = (allCusto[k]||0) + v; });
     }
   });
 
@@ -595,101 +561,21 @@ function renderParetoCusto(filtered) {
   const sorted = Object.entries(allCusto).sort((a,b)=>b[1]-a[1]).slice(0, 6);
 
   container.innerHTML = sorted.map(([nome, custo]) => {
-    const pct = totalCusto > 0 ? (custo / totalCusto * 100) : 0;
+    const pct = totalCusto > 0 ? (custo/totalCusto*100) : 0;
     const custoFmt = custo >= 1000 ? `R$${(custo/1000).toFixed(1)}k` : `R$${custo.toFixed(2)}`;
     return `<div class="pareto-item">
       <div class="pareto-header">
         <span class="pareto-name">${nome}</span>
         <span class="pareto-pct">${pct.toFixed(1)}% <span style="color:var(--muted);font-size:10px">(${custoFmt})</span></span>
       </div>
-      <div class="pareto-bar-bg">
-        <div class="pareto-bar-fill" style="width:${pct.toFixed(1)}%"></div>
-      </div>
+      <div class="pareto-bar-bg"><div class="pareto-bar-fill" style="width:${pct.toFixed(1)}%"></div></div>
     </div>`;
-  }).join('');
-
-  container.innerHTML += `<div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:10px;">
+  }).join('') + `<div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:10px;">
     <span style="color:var(--muted)">TOTAL SCRAP</span>
     <span style="color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-weight:600">
       R$${totalCusto.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
     </span>
   </div>`;
-}
-
-// ── DRL ───────────────────────────────────────────────────────────────────────
-async function loadDRL() {
-  const container = document.getElementById('drl-container');
-  if (!container) return;
-
-  const URL_DESVIOS = 'https://script.google.com/macros/s/AKfycbznZqoCs3r5s3Lp6Vd7bfaNFak8oeYwHAKV6l4Uk9-7G-MwvdtyHQiOf46d02DcU-hiBw/exec';
-
-  try {
-    const [resD, resP] = await Promise.all([
-      fetch(URL_DESVIOS + '?action=getDesvios'),
-      fetch(URL_DESVIOS + '?action=getProducao')
-    ]);
-    const desvios   = await resD.json();
-    const producoes = await resP.json();
-
-    const dias = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      dias.push(d.toISOString().split('T')[0]);
-    }
-
-    const barras = dias.map(dt => {
-      const prod = producoes
-        .filter(p=>{ const pd=p.Data||p.date||''; return String(pd).includes(dt)||String(pd).startsWith(dt); })
-        .reduce((s,p)=>s+(Number(p.Quantidade||p.qty)||0), 0);
-      const desv = desvios
-        .filter(d=>{ const dd=d.Data||d.data||''; return String(dd).includes(dt)||String(dd).startsWith(dt); })
-        .reduce((s,d)=>s+(Number(d.Quantidade||d.qtd)||1), 0);
-      const drl = prod > 0 ? (desv/prod*100) : null;
-      const label = dt.slice(5).replace('-','/');
-      const isToday = dt === new Date().toISOString().split('T')[0];
-      return { dt, prod, desv, drl, label, isToday };
-    });
-
-    const maxDrl = Math.max(...barras.map(b=>b.drl||0), 2);
-    const hoje   = barras.find(b=>b.isToday);
-    const drlHoje = hoje?.drl;
-
-    function drlColor(v) {
-      if (v===null) return '#2A2A3E';
-      if (v>8) return '#e74c3c';
-      if (v>5) return '#e67e22';
-      if (v>2) return '#f39c12';
-      return '#2ecc71';
-    }
-
-    const kpiHtml = drlHoje !== null
-      ? `<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
-           <span style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:700;color:${drlColor(drlHoje)}">${drlHoje.toFixed(1)}%</span>
-           <span style="font-size:10px;color:var(--muted)">HOJE</span>
-           <span style="font-size:10px;padding:2px 8px;border-radius:2px;background:rgba(0,0,0,.2);color:${drlColor(drlHoje)}">${drlHoje<=2?'✓ META':drlHoje<=5?'⚠ ATENÇÃO':drlHoje<=8?'⚠ ALERTA':'🔴 CRÍTICO'}</span>
-         </div>`
-      : `<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Aguardando lançamento de hoje...</div>`;
-
-    const barsHtml = `<div style="display:flex;align-items:flex-end;gap:6px;height:60px;margin-bottom:4px;">
-      ${barras.map(b=>{
-        const pct = b.drl!==null ? Math.max((b.drl/maxDrl*100),5) : 5;
-        const cor = drlColor(b.drl);
-        return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">
-          <span style="font-size:10px;font-weight:${b.isToday?700:400};color:${cor};font-family:'Barlow Condensed',sans-serif">${b.drl!==null?b.drl.toFixed(1)+'%':'—'}</span>
-          <div style="width:100%;border-radius:2px 2px 0 0;background:${cor};opacity:${b.isToday?1:0.6};height:${pct}%;min-height:3px;transition:height .4s"></div>
-          <span style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:${b.isToday?700:400}">${b.label}${b.isToday?' ◀':''}</span>
-        </div>`;
-      }).join('')}
-    </div>`;
-
-    container.innerHTML = kpiHtml + barsHtml;
-  } catch(e) {
-    container.innerHTML = `<div style="font-size:10px;color:var(--muted);line-height:1.8">
-      Conectando ao sistema de desvios...<br>
-      <span style="color:var(--accent)">Disponível quando houver lançamentos.</span>
-    </div>`;
-  }
 }
 
 // ── TEMPO SEPARAÇÃO ───────────────────────────────────────────────────────────
@@ -699,63 +585,45 @@ function renderTempoSeparacao(filtered) {
   if (!tempos.length) {
     document.getElementById('tempo-medio').textContent = '—';
     document.getElementById('tempo-total').textContent = '—';
-    renderSemanasReq(filtered);
-    return;
+  } else {
+    const media     = tempos.reduce((a,t)=>a+t.media,0) / tempos.length;
+    const totalReqs = tempos.reduce((a,t)=>a+(t.total||0), 0);
+    // media em minutos (GAS v5)
+    const fmtMin = v => v < 60 ? `${Math.round(v)}min` : `${(v/60).toFixed(1)}h`;
+    document.getElementById('tempo-medio').textContent = fmtMin(media);
+    document.getElementById('tempo-total').textContent = totalReqs;
   }
 
-  const media     = tempos.reduce((a,t)=>a+t.media,0) / tempos.length;
-  const totalReqs = tempos.reduce((a,t)=>a+(t.total||0), 0);
-
-  // media agora vem em minutos (GAS v5)
-  const fmtMin = v => v < 60 ? `${Math.round(v)}min` : `${(v/60).toFixed(1)}h`;
-
-  document.getElementById('tempo-medio').textContent = fmtMin(media);
-  document.getElementById('tempo-total').textContent = totalReqs;
   renderSemanasReq(filtered);
 }
 
-// ── SEMANAS + PARETO DE REQUISIÇÕES (dimensão configurável) ───────────────────
+// ── SEMANAS + PARETO DE REQUISIÇÕES ──────────────────────────────────────────
+// O frontend apenas seleciona o campo correto (paretoReqMotivo / Area / Peca)
+// com base no dropdown — os dados já vieram pré-calculados do GAS.
 function renderSemanasReq(filtered) {
-  // Barras semanais
   const containerSem = document.getElementById('req-semanas-container');
   if (!containerSem) return;
 
   const MESES_ABR = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   const barras = [];
 
-  // Agrega o paretoReq pelo campo da dimensão escolhida
-  const allReq = {};
-
   filtered.forEach(d => {
-    if (!d.tempoSep) return;
-
+    if (!d.tempoSep?.porSemana) return;
     const mesIdx = MESES_ABR.findIndex(m => String(d.mes).includes(m));
     const mesAbr = mesIdx >= 0 ? MESES_ABR[mesIdx] : d.mes;
-
-    if (d.tempoSep.porSemana) {
-      ['Sem 1','Sem 2','Sem 3','Sem 4','Sem 5'].forEach((sem, i) => {
-        const qty = d.tempoSep.porSemana[sem] || 0;
-        if (qty > 0) barras.push({ label: `S${i+1} ${mesAbr}`, qty });
-      });
-    }
+    ['Sem 1','Sem 2','Sem 3','Sem 4','Sem 5'].forEach((sem, i) => {
+      const qty = d.tempoSep.porSemana[sem] || 0;
+      if (qty > 0) barras.push({ label: `S${i+1} ${mesAbr}`, qty });
+    });
   });
 
-  // Agrega paretoReq de todos os meses filtrados
-  filtered.forEach(d => {
-    if (d.paretoReq && typeof d.paretoReq === 'object') {
-      Object.entries(d.paretoReq).forEach(([k, v]) => {
-        allReq[k] = (allReq[k] || 0) + v;
-      });
-    }
-  });
-
-  // Renderiza barras semanais
+  // Barras semanais
   if (!barras.length) {
     containerSem.innerHTML = '<div style="color:var(--muted);font-size:10px;">Dados disponíveis após atualização do script</div>';
   } else {
     const maxVal = Math.max(...barras.map(b => b.qty), 1);
     containerSem.innerHTML = barras.map(({ label, qty }) => {
-      const pct = Math.max((qty / maxVal * 100), 5);
+      const pct = Math.max((qty/maxVal*100), 5);
       return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
         <span style="font-size:11px;color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-weight:600">${qty}</span>
         <div style="width:100%;border-radius:2px 2px 0 0;background:var(--teal);opacity:.8;height:${pct}%;min-height:4px"></div>
@@ -764,17 +632,28 @@ function renderSemanasReq(filtered) {
     }).join('');
   }
 
-  // Atualiza o título dinâmico do Pareto de Requisições
-  const dim = getDimensao();
+  // Dimensão selecionada no dropdown
+  const dim  = getDimensao();
+
+  // Atualiza o título dinâmico
   const tituloEl = document.getElementById('pareto-req-titulo');
   if (tituloEl) tituloEl.textContent = dim.label;
+
+  // Agrega o campo correto de todos os meses filtrados
+  const allReq = {};
+  filtered.forEach(d => {
+    const obj = d[dim.campo];
+    if (obj && typeof obj === 'object') {
+      Object.entries(obj).forEach(([k, v]) => { allReq[k] = (allReq[k]||0) + v; });
+    }
+  });
 
   // Renderiza Pareto de Requisições
   const paretoContainer = document.getElementById('pareto-req-container');
   if (!paretoContainer) return;
 
   if (!Object.keys(allReq).length) {
-    paretoContainer.innerHTML = '<div style="color:var(--muted);font-size:10px;">Sem dados de ' + dim.label.toLowerCase() + '</div>';
+    paretoContainer.innerHTML = `<div style="color:var(--muted);font-size:10px;">Sem dados de ${dim.label.toLowerCase()}</div>`;
     return;
   }
 
@@ -803,16 +682,12 @@ function renderParetoQtd(filtered) {
   const allQtd = {};
   filtered.forEach(d => {
     if (d.pareto && typeof d.pareto === 'object') {
-      Object.entries(d.pareto).forEach(([k, v]) => {
-        allQtd[k] = (allQtd[k] || 0) + v;
-      });
+      Object.entries(d.pareto).forEach(([k, v]) => { allQtd[k] = (allQtd[k]||0) + v; });
     }
   });
 
   if (!Object.keys(allQtd).length) {
-    container.innerHTML = `<div style="color:var(--muted);font-size:10px;line-height:1.8">
-      Disponível após atualização<br>do Apps Script.
-    </div>`;
+    container.innerHTML = `<div style="color:var(--muted);font-size:10px;line-height:1.8">Disponível após atualização<br>do Apps Script.</div>`;
     return;
   }
 
@@ -833,58 +708,98 @@ function renderParetoQtd(filtered) {
   }).join('');
 }
 
+// ── DRL ───────────────────────────────────────────────────────────────────────
+async function loadDRL() {
+  const container = document.getElementById('drl-container');
+  if (!container) return;
+  const URL_DESVIOS = 'https://script.google.com/macros/s/AKfycbznZqoCs3r5s3Lp6Vd7bfaNFak8oeYwHAKV6l4Uk9-7G-MwvdtyHQiOf46d02DcU-hiBw/exec';
+  try {
+    const [resD, resP] = await Promise.all([
+      fetch(URL_DESVIOS + '?action=getDesvios'),
+      fetch(URL_DESVIOS + '?action=getProducao')
+    ]);
+    const desvios   = await resD.json();
+    const producoes = await resP.json();
+    const dias = [];
+    for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate()-i); dias.push(d.toISOString().split('T')[0]); }
+    const barras = dias.map(dt => {
+      const prod = producoes.filter(p=>{ const pd=p.Data||p.date||''; return String(pd).includes(dt)||String(pd).startsWith(dt); }).reduce((s,p)=>s+(Number(p.Quantidade||p.qty)||0),0);
+      const desv = desvios.filter(d=>{ const dd=d.Data||d.data||''; return String(dd).includes(dt)||String(dd).startsWith(dt); }).reduce((s,d)=>s+(Number(d.Quantidade||d.qtd)||1),0);
+      const drl = prod > 0 ? (desv/prod*100) : null;
+      return { dt, prod, desv, drl, label: dt.slice(5).replace('-','/'), isToday: dt===new Date().toISOString().split('T')[0] };
+    });
+    const maxDrl  = Math.max(...barras.map(b=>b.drl||0), 2);
+    const drlHoje = barras.find(b=>b.isToday)?.drl;
+    const drlColor = v => v===null?'#2A2A3E':v>8?'#e74c3c':v>5?'#e67e22':v>2?'#f39c12':'#2ecc71';
+    const kpiHtml = drlHoje!=null
+      ? `<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
+           <span style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:700;color:${drlColor(drlHoje)}">${drlHoje.toFixed(1)}%</span>
+           <span style="font-size:10px;color:var(--muted)">HOJE</span>
+           <span style="font-size:10px;padding:2px 8px;border-radius:2px;background:rgba(0,0,0,.2);color:${drlColor(drlHoje)}">${drlHoje<=2?'✓ META':drlHoje<=5?'⚠ ATENÇÃO':drlHoje<=8?'⚠ ALERTA':'🔴 CRÍTICO'}</span>
+         </div>`
+      : `<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Aguardando lançamento de hoje...</div>`;
+    const barsHtml = `<div style="display:flex;align-items:flex-end;gap:6px;height:60px;margin-bottom:4px;">
+      ${barras.map(b=>{ const pct=b.drl!=null?Math.max((b.drl/maxDrl*100),5):5; const cor=drlColor(b.drl);
+        return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">
+          <span style="font-size:10px;font-weight:${b.isToday?700:400};color:${cor};font-family:'Barlow Condensed',sans-serif">${b.drl!=null?b.drl.toFixed(1)+'%':'—'}</span>
+          <div style="width:100%;border-radius:2px 2px 0 0;background:${cor};opacity:${b.isToday?1:0.6};height:${pct}%;min-height:3px;transition:height .4s"></div>
+          <span style="font-size:10px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:${b.isToday?700:400}">${b.label}${b.isToday?' ◀':''}</span>
+        </div>`;}).join('')}
+    </div>`;
+    container.innerHTML = kpiHtml + barsHtml;
+  } catch(e) {
+    container.innerHTML = `<div style="font-size:10px;color:var(--muted);line-height:1.8">Conectando ao sistema de desvios...<br><span style="color:var(--accent)">Disponível quando houver lançamentos.</span></div>`;
+  }
+}
+
 // ── CHARTS ────────────────────────────────────────────────────────────────────
 const CD = {
-  responsive: false, maintainAspectRatio: false, animation: false,
-  plugins: { legend:{display:false}, tooltip:{backgroundColor:'#1e2330',titleColor:'#f5a623',bodyColor:'#e8ecf4',borderColor:'#f5a623',borderWidth:1}},
-  scales: {
+  responsive:false, maintainAspectRatio:false, animation:false,
+  plugins:{ legend:{display:false}, tooltip:{backgroundColor:'#1e2330',titleColor:'#f5a623',bodyColor:'#e8ecf4',borderColor:'#f5a623',borderWidth:1}},
+  scales:{
     x:{grid:{color:'#1e2330'},ticks:{color:'#6b7590',font:{family:'Barlow Condensed',size:12}}},
     y:{grid:{color:'#1e2330'},ticks:{color:'#6b7590',font:{family:'Barlow Condensed',size:12}}}
   }
 };
 
 function freshCtx(id) {
-  if (charts[id]) { charts[id].destroy(); charts[id] = null; }
-  const old = document.getElementById(id);
-  const parent = old.parentNode;
-  const w = parent.offsetWidth || 300;
-  const neo = document.createElement('canvas');
-  neo.id = id; neo.width = w; neo.height = 100;
-  neo.style.width = w + 'px'; neo.style.height = '100px';
-  parent.replaceChild(neo, old);
-  return neo.getContext('2d');
+  if (charts[id]) { charts[id].destroy(); charts[id]=null; }
+  const old=document.getElementById(id); const parent=old.parentNode;
+  const w=parent.offsetWidth||300;
+  const neo=document.createElement('canvas');
+  neo.id=id; neo.width=w; neo.height=100; neo.style.width=w+'px'; neo.style.height='100px';
+  parent.replaceChild(neo,old); return neo.getContext('2d');
 }
 
 function drawScrapChart(labels, data, meta) {
   const ctx = freshCtx('chart-scrap');
-  charts['chart-scrap'] = new Chart(ctx, { type:'bar', data:{ labels, datasets:[
-    { data:data.map(d=>d.scrapCost),
-      backgroundColor:data.map(d=>d.scrapCost>meta?'rgba(231,76,60,.7)':'rgba(245,166,35,.6)'),
-      borderColor:data.map(d=>d.scrapCost>meta?'#e74c3c':'#f5a623'), borderWidth:1 }
-  ]}, options:CD });
+  charts['chart-scrap'] = new Chart(ctx,{type:'bar',data:{labels,datasets:[{
+    data:data.map(d=>d.scrapCost),
+    backgroundColor:data.map(d=>d.scrapCost>meta?'rgba(231,76,60,.7)':'rgba(245,166,35,.6)'),
+    borderColor:data.map(d=>d.scrapCost>meta?'#e74c3c':'#f5a623'),borderWidth:1
+  }]},options:CD});
 }
 
 function drawBomChart(labels, data) {
   const ctx = freshCtx('chart-bom');
-  charts['chart-bom'] = new Chart(ctx, { type:'bar', data:{ labels, datasets:[
-    { data:data.map(d=>d.bomErros),
-      backgroundColor:data.map(d=>d.bomErros>0?'rgba(52,152,219,.7)':'rgba(52,152,219,.2)'),
-      borderColor:'#3498db', borderWidth:1, borderRadius:2 }
-  ]}, options:CD });
+  charts['chart-bom'] = new Chart(ctx,{type:'bar',data:{labels,datasets:[{
+    data:data.map(d=>d.bomErros),
+    backgroundColor:data.map(d=>d.bomErros>0?'rgba(52,152,219,.7)':'rgba(52,152,219,.2)'),
+    borderColor:'#3498db',borderWidth:1,borderRadius:2
+  }]},options:CD});
 }
 
 function drawEficChart(labels, data, meta) {
   const ctx = freshCtx('chart-efic');
-  const eficData = data.map(d => {
-    if (d.minPlan>0&&d.minReal>0) return parseFloat((d.minReal/d.minPlan*100).toFixed(2));
-    if (d.efic>0) return d.efic;
-    return null;
+  const eficData = data.map(d=>{
+    if(d.minPlan>0&&d.minReal>0) return parseFloat((d.minReal/d.minPlan*100).toFixed(2));
+    if(d.efic>0) return d.efic; return null;
   });
-  charts['chart-efic'] = new Chart(ctx, { type:'line', data:{ labels, datasets:[
-    { data:eficData, borderColor:'#2ecc71', backgroundColor:'rgba(46,204,113,.08)', fill:true, tension:.3,
-      pointBackgroundColor:eficData.map(v=>v!==null&&v<meta?'#e74c3c':'#2ecc71'), pointRadius:4 },
-    { data:data.map(()=>meta), borderColor:'rgba(245,166,35,.4)', borderDash:[4,4], borderWidth:1, pointRadius:0, fill:false }
-  ]}, options:CD });
+  charts['chart-efic'] = new Chart(ctx,{type:'line',data:{labels,datasets:[
+    {data:eficData,borderColor:'#2ecc71',backgroundColor:'rgba(46,204,113,.08)',fill:true,tension:.3,
+     pointBackgroundColor:eficData.map(v=>v!==null&&v<meta?'#e74c3c':'#2ecc71'),pointRadius:4},
+    {data:data.map(()=>meta),borderColor:'rgba(245,166,35,.4)',borderDash:[4,4],borderWidth:1,pointRadius:0,fill:false}
+  ]},options:CD});
 }
 
 // ── STATUS ────────────────────────────────────────────────────────────────────
@@ -898,19 +813,11 @@ function setStatus(text, type) {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
-  // Restaura metas salvas
-  const savedMetas = {
-    'meta-scrap-cost': 'brilia_meta_cost',
-    'meta-bom':        'brilia_meta_bom',
-    'meta-efic':       'brilia_meta_efic',
-  };
-  Object.entries(savedMetas).forEach(([id, key]) => {
-    const v  = localStorage.getItem(key);
-    const el = document.getElementById(id);
-    if (v && el) el.value = v;
-  });
+  // Restaura metas
+  [['meta-scrap-cost','brilia_meta_cost'],['meta-bom','brilia_meta_bom'],['meta-efic','brilia_meta_efic']]
+    .forEach(([id, key]) => { const v=localStorage.getItem(key); const el=document.getElementById(id); if(v&&el) el.value=v; });
 
-  // Restaura dimensão salva do Pareto de Requisições
+  // Restaura dimensão salva
   const dimSalva = localStorage.getItem('brilia_pareto_dimensao');
   if (dimSalva && document.querySelector(`#pareto-dimensao option[value="${dimSalva}"]`)) {
     document.getElementById('pareto-dimensao').value = dimSalva;
@@ -919,11 +826,10 @@ window.addEventListener('load', () => {
   loadData();
 });
 
-// Listeners de período e dimensão
 document.getElementById('mes-inicio').addEventListener('change', renderAll);
 document.getElementById('mes-fim').addEventListener('change', renderAll);
 
-// Ao trocar a dimensão: salva a preferência e rerenderiza sem buscar dados novamente
+// Troca de dimensão: apenas rerenderiza sem nova requisição ao GAS
 document.getElementById('pareto-dimensao').addEventListener('change', () => {
   localStorage.setItem('brilia_pareto_dimensao', document.getElementById('pareto-dimensao').value);
   if (rawData) renderAll();
