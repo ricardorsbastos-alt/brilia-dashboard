@@ -462,7 +462,7 @@ function renderKPIsOnly() {
 
   const totMP = filtered.reduce((a,d)=>a+(d.custoMP||0), 0);
   const pctMP = totMP > 0 ? (totCost / totMP * 100) : 0;
-  const { mScrapPct, mBom, mEfic } = getMetas();
+  const { mScrapPct } = getMetas();
   setKPI('scrap-unit',
     `${pctMP.toFixed(2)}<sup>%</sup>`,
     pctMP === 0 ? 'warn' : pctMP > mScrapPct ? 'bad' : 'ok',
@@ -509,7 +509,7 @@ function renderAll() {
 
   const totMP = filtered.reduce((a,d)=>a+(d.custoMP||0), 0);
   const pctMP = totMP > 0 ? (totCost / totMP * 100) : 0;
-  const { mScrapPct, mBom, mEfic } = getMetas();
+  const { mScrapPct } = getMetas();
   setKPI('scrap-unit',
     `${pctMP.toFixed(2)}<sup>%</sup>`,
     pctMP === 0 ? 'warn' : pctMP > mScrapPct ? 'bad' : 'ok',
