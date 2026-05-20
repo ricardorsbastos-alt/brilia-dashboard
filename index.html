@@ -191,8 +191,8 @@ canvas { display: block; }
     <div class="kpi-col">
       <div class="kpi-card c-red">
         <div class="kpi-icon">📊</div>
-        <div class="kpi-label">Custo Unitário Scrap</div>
-        <div class="kpi-value" id="v-scrap-unit">—</div>
+        <div class="kpi-label">Scrap % da MP</div>
+        <div class="kpi-value" id="v-scrap-unit">—<sup>%</sup></div>
         <div class="kpi-status" id="s-scrap-unit"><span class="dot"></span> Aguardando</div>
         <div class="kpi-meta">META: <span id="m-scrap-unit">—</span></div>
       </div>
@@ -304,8 +304,8 @@ canvas { display: block; }
   <!-- METAS -->
   <div class="metas-row" style="grid-template-columns: repeat(3, minmax(0,1fr));">
     <div class="meta-block">
-      <span class="meta-label">Meta Scrap R$</span>
-      <input type="number" class="meta-input" id="meta-scrap-cost" value="1000" onchange="updateMetas()">
+      <span class="meta-label">Meta Scrap %MP</span>
+      <input type="number" class="meta-input" id="meta-scrap-pct" value="0.5" step="0.1" onchange="updateMetas()">
     </div>
     <div class="meta-block">
       <span class="meta-label">Meta BOM Erros</span>
@@ -349,22 +349,22 @@ const DEMO_DATA = [
   { mes:'Jan', scrapQty:204, scrapCost:1672.69, bomErros:0, minPlan:0, minReal:0, efic:0,
     paretoCusto:{'Falha na produção':820.50,'Queimado':510.30,'Deformidade':220.10,'Rigidez':121.79},
     pareto:null, tempoSep:null,
-    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null },
+    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null, custoMP:261360, scrapPctMP:0.64 },
   { mes:'Fev', scrapQty:61, scrapCost:632.85, bomErros:0, minPlan:0, minReal:0, efic:0,
     paretoCusto:{'Queimado':310.20,'Falha na produção':200.15,'Rigidez':122.50},
     pareto:null, tempoSep:null,
-    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null },
+    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null, custoMP:321110, scrapPctMP:0.20 },
   { mes:'Mar', scrapQty:182, scrapCost:3799.46, bomErros:0, minPlan:0, minReal:0, efic:0,
     paretoCusto:{'Falha na produção':1800.00,'Queimado':950.46,'Deformidade':700.00,'Rigidez':349.00},
     pareto:null, tempoSep:null,
-    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null },
+    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null, custoMP:449551, scrapPctMP:0.85 },
   { mes:'Abr', scrapQty:204, scrapCost:1623.89, bomErros:5, minPlan:70896, minReal:71620.74, efic:101.02,
     paretoCusto:{'Falha na produção':700.00,'Queimado':480.89,'Deformidade':280.00,'Rigidez':163.00},
     pareto:null, tempoSep:null,
-    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null },
+    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null, custoMP:486702, scrapPctMP:0.33 },
   { mes:'Mai', scrapQty:0, scrapCost:0, bomErros:1, minPlan:23632, minReal:15539, efic:0,
     paretoCusto:null, pareto:null, tempoSep:null,
-    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null },
+    paretoReqMotivo:null, paretoReqArea:null, paretoReqPeca:null, custoMP:166209, scrapPctMP:0.48 },
   ...Array(7).fill(null).map((_,i)=>({
     mes:MESES[5+i], scrapQty:0, scrapCost:0, bomErros:0, minPlan:0, minReal:0, efic:0,
     paretoCusto:null, pareto:null, tempoSep:null,
@@ -399,6 +399,8 @@ async function loadData() {
         minPlan:         parseFloat(d.minPlan)   || 0,
         minReal:         parseFloat(d.minReal)   || 0,
         efic:            parseFloat(d.efic)      || 0,
+        custoMP:         parseFloat(d.custoMP)   || 0,
+        scrapPctMP:      parseFloat(d.scrapPctMP)|| 0,
         pareto:          d.pareto      || null,
         paretoCusto:     d.paretoCusto || null,
         tempoSep:        d.tempoSep    || null,
@@ -421,20 +423,20 @@ async function loadData() {
 
 // ── METAS ─────────────────────────────────────────────────────────────────────
 function updateMetas() {
-  const mCost = parseFloat(document.getElementById('meta-scrap-cost').value) || 1000;
-  const mBom  = parseFloat(document.getElementById('meta-bom').value)        || 0;
-  const mEfic = parseFloat(document.getElementById('meta-efic').value)       || 95;
-  localStorage.setItem('brilia_meta_cost', mCost);
-  localStorage.setItem('brilia_meta_bom',  mBom);
-  localStorage.setItem('brilia_meta_efic', mEfic);
+  const mScrapPct = parseFloat(document.getElementById('meta-scrap-pct').value) || 0.5;
+  const mBom      = parseFloat(document.getElementById('meta-bom').value)      || 0;
+  const mEfic     = parseFloat(document.getElementById('meta-efic').value)     || 95;
+  localStorage.setItem('brilia_meta_scrap_pct', mScrapPct);
+  localStorage.setItem('brilia_meta_bom',       mBom);
+  localStorage.setItem('brilia_meta_efic',      mEfic);
   if (rawData) renderKPIsOnly();
 }
 
 function getMetas() {
   return {
-    mCost: parseFloat(document.getElementById('meta-scrap-cost').value) || 1000,
-    mBom:  parseFloat(document.getElementById('meta-bom').value)        || 0,
-    mEfic: parseFloat(document.getElementById('meta-efic').value)       || 95,
+    mScrapPct: parseFloat(document.getElementById('meta-scrap-pct').value) || 0.5,
+    mBom:      parseFloat(document.getElementById('meta-bom').value)      || 0,
+    mEfic:     parseFloat(document.getElementById('meta-efic').value)     || 95,
   };
 }
 
@@ -458,10 +460,16 @@ function renderKPIsOnly() {
   const avgEfic = eficArr.length ? eficArr.reduce((a,v)=>a+v,0)/eficArr.length : 0;
   const { mCost, mBom, mEfic } = getMetas();
 
+  const totMP = filtered.reduce((a,d)=>a+(d.custoMP||0), 0);
+  const pctMP = totMP > 0 ? (totCost / totMP * 100) : 0;
+  const { mScrapPct, mBom, mEfic } = getMetas();
   setKPI('scrap-unit',
-    `<sup>R$</sup>${custoUnit.toFixed(2)}<span style="font-size:14px;color:var(--muted)">/un</span>`,
-    custoUnit === 0 ? 'warn' : 'info',
-    custoUnit === 0 ? '— Sem dados' : `R$ ${custoUnit.toFixed(2)} por peça`, '—');
+    `${pctMP.toFixed(2)}<sup>%</sup>`,
+    pctMP === 0 ? 'warn' : pctMP > mScrapPct ? 'bad' : 'ok',
+    pctMP === 0 ? '— Sem dados MP' : pctMP > mScrapPct
+      ? `⚠ ${pctMP.toFixed(2)}% — acima da meta`
+      : `✓ ${pctMP.toFixed(2)}% — dentro da meta`,
+    mScrapPct.toFixed(1) + '%');
   setKPI('scrap-cost',
     `<sup>R$</sup>${totCost.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}`,
     totCost > mCost ? 'bad' : 'ok',
@@ -499,10 +507,16 @@ function renderAll() {
   const avgEfic = eficArr.length ? eficArr.reduce((a,v)=>a+v,0)/eficArr.length : 0;
   const { mCost, mBom, mEfic } = getMetas();
 
+  const totMP = filtered.reduce((a,d)=>a+(d.custoMP||0), 0);
+  const pctMP = totMP > 0 ? (totCost / totMP * 100) : 0;
+  const { mScrapPct, mBom, mEfic } = getMetas();
   setKPI('scrap-unit',
-    `<sup>R$</sup>${custoUnit.toFixed(2)}<span style="font-size:14px;color:var(--muted)">/un</span>`,
-    custoUnit === 0 ? 'warn' : 'info',
-    custoUnit === 0 ? '— Sem dados' : `R$ ${custoUnit.toFixed(2)} por peça`, '—');
+    `${pctMP.toFixed(2)}<sup>%</sup>`,
+    pctMP === 0 ? 'warn' : pctMP > mScrapPct ? 'bad' : 'ok',
+    pctMP === 0 ? '— Sem dados MP' : pctMP > mScrapPct
+      ? `⚠ ${pctMP.toFixed(2)}% — acima da meta`
+      : `✓ ${pctMP.toFixed(2)}% — dentro da meta`,
+    mScrapPct.toFixed(1) + '%');
   setKPI('scrap-cost',
     `<sup>R$</sup>${totCost.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}`,
     totCost > mCost ? 'bad' : 'ok',
@@ -772,6 +786,7 @@ function freshCtx(id) {
 }
 
 function drawScrapChart(labels, data, meta) {
+  meta = meta || 10000; // fallback
   const ctx = freshCtx('chart-scrap');
   charts['chart-scrap'] = new Chart(ctx,{type:'bar',data:{labels,datasets:[{
     data:data.map(d=>d.scrapCost),
@@ -814,7 +829,7 @@ function setStatus(text, type) {
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
   // Restaura metas
-  [['meta-scrap-cost','brilia_meta_cost'],['meta-bom','brilia_meta_bom'],['meta-efic','brilia_meta_efic']]
+  [['meta-scrap-pct','brilia_meta_scrap_pct'],['meta-bom','brilia_meta_bom'],['meta-efic','brilia_meta_efic']]
     .forEach(([id, key]) => { const v=localStorage.getItem(key); const el=document.getElementById(id); if(v&&el) el.value=v; });
 
   // Restaura dimensão salva
